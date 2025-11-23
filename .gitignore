@@ -1,0 +1,103 @@
+# ===========================
+# Flutter Standard .gitignore
+# ===========================
+
+# Misc
+*.log
+*.tmp
+*.lock
+*.pyc
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE folders
+.idea/
+.vscode/
+.atom/
+.svn/
+.swiftpm/
+
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Coverage
+coverage/
+
+# Build outputs
+build/
+**/build/
+
+# ===========================
+# Android related
+# ===========================
+android/.gradle/
+android/.idea/
+android/local.properties
+android/key.properties
+android/key.jks
+*.keystore
+*.jks
+
+# Android Studio
+*.iml
+.gradle/
+gradlew
+gradlew.bat
+
+# ===========================
+# iOS/macOS related
+# ===========================
+ios/Flutter/.last_build_id
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/DerivedData/
+ios/.generated/
+
+macos/Flutter/ephemeral/
+macos/Pods/
+macos/Runner.xcworkspace/
+macos/DerivedData/
+
+# Do NOT commit iOS GoogleService file if using secret keys
+# Uncomment if needed:
+# ios/Runner/GoogleService-Info.plist
+
+# ===========================
+# Web
+# ===========================
+web/.dart_tool/
+
+# ===========================
+# Windows/Linux
+# ===========================
+windows/flutter/
+linux/flutter/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ===========================
+# Firebase
+# ===========================
+# Do NOT ignore these two (they are required):
+# android/app/google-services.json
+# ios/Runner/GoogleService-Info.plist
+
+# Ignore service account credentials (important)
+serviceAccountKey.json
+
+# ===========================
+# App-specific
+# ===========================
+app.*.symbols
+app.*.map.json
+
+# Migration
+migrate_working_dir/
