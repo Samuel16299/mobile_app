@@ -40,7 +40,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.language, color: Colors.blue),
-                  title: Text(isIndo ? 'Bahasa Indonesia' : 'Indonesian Language'),
+                  title: Text(isIndo ? 'Bahasa Indonesia' : 'English Language'),
                   trailing: Switch(
                     value: isIndo,
                     activeColor: Colors.blue,
