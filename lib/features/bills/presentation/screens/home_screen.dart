@@ -16,7 +16,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Variabel untuk menyimpan kategori yang sedang dipilih (null = semua tampil)
+  // Variabel untuk menyimpan kategori yang sedang dipilih
   String? _selectedCategory;
 
   @override
@@ -27,11 +27,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final billsAsync = ref.watch(billsStreamProvider);
     final billsController = ref.watch(billsControllerProvider);
 
-    // 1. AMBIL STATUS BAHASA SAAT INI
     final currentLocale = ref.watch(localeProvider);
     final isIndo = currentLocale.languageCode == 'id';
 
-    // 2. KAMUS KATA-KATA (Terjemahan Home)
     final labels = {
       'header': isIndo ? 'Jangan lupa bayar!' : "Don't forget to pay!",
       'hello': isIndo ? 'Halo' : 'Hello',
@@ -48,8 +46,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'settings_tooltip': isIndo ? 'Pengaturan' : 'Settings',
     };
 
-    // 3. DATA KATEGORI (Icon & Label Terjemahan)
-    // 'id' harus sama dengan data yang disimpan di database untuk filtering
     final categories = [
       {
         'id': 'PDAM',
@@ -179,7 +175,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     )
                   else
-                    // Jika tidak ada filter, tampilkan tombol shortcut tambah (PENGGANTI FAB)
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline),
                       onPressed: () => Navigator.push(
@@ -210,7 +205,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          // Logika Toggle: Jika diklik lagi -> matikan filter
                           if (_selectedCategory == id) {
                             _selectedCategory = null;
                           } else {
@@ -223,7 +217,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: 92,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          // Ubah warna background jika dipilih
+                          // Ubah warna background
                           color: isSelected
                               ? Colors.blueAccent
                               : const Color(0xFFDFF7F7),
@@ -354,7 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               },
                             ),
 
-                            // [FITUR 2] STRIKETHROUGH JUDUL
+                            // [FITUR 2] JUDUL
                             title: Text(
                               b.title,
                               style: TextStyle(
@@ -372,8 +366,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 Text(
                                   '${labels['due_date']}: ${DateFormat.yMMMd(currentLocale.languageCode).format(b.dueDate)}',
                                   style: const TextStyle(fontSize: 12),
-                                ),
-                                // Harga dipindah ke sini agar muat tombol aksi
+                                ),                
                                 Text(
                                   NumberFormat.currency(
                                     locale: currentLocale.languageCode == 'id'
@@ -381,7 +374,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         : 'en_US',
                                     symbol: currentLocale.languageCode == 'id'
                                         ? 'Rp '
-                                        : '\$ ',
+                                        : 'Rp ',
                                     decimalDigits: 0,
                                   ).format(b.amount),
                                   style: const TextStyle(
