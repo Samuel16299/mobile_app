@@ -393,7 +393,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 Text(
                                   NumberFormat.currency(
                                     locale: currentLocale.toString(),
-                                    symbol: currentLocale.languageCode == 'id' ? 'Rp ' : '\$',
+                                    symbol: currentLocale.languageCode == 'id' ? 'Rp',
                                     decimalDigits: 0,
                                   ).format(b.amount),
                                   style: const TextStyle(
