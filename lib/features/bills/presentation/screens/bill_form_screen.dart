@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/bill_model.dart';
@@ -26,8 +27,6 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   String? notes;
   bool _loading = false;
 
-  // Karena kategori disimpan di database, ID-nya (value) jangan diterjemahkan.
-  // Yang diterjemahkan hanya tampilannya (child text).
   final List<String> _categoriesIds = [
     'PDAM',
     'PLN',
@@ -72,16 +71,16 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
   }
 
   Future<void> _submit(bool isIndo) async {
-    // Pesan validasi juga diterjemahkan
     final errorMsg = isIndo
         ? 'Lengkapi form dan pilih tanggal'
         : 'Please complete the form and pick a date';
     final errorSave = isIndo ? 'Gagal: ' : 'Failed: ';
+    final timeoutMsg = isIndo
+        ? 'Request timeout, coba lagi nanti.'
+        : 'Request timed out, please try again later.';
 
     if (!_formKey.currentState!.validate() || dueDate == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(errorMsg)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
       return;
     }
 
@@ -91,15 +90,17 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
 
-    try {
-      final auth = ref.read(authServiceProvider);
-      final repo = ref.read(billRepositoryProvider);
-      final user = auth.currentUser;
+    print('>>> SUBMIT START');
 
+    try {
+      print('>>> reading auth');
+      final auth = ref.read(authServiceProvider);
+      final user = auth.currentUser;
       if (user == null) throw Exception('User not logged in');
 
+      print('>>> build billData');
       final billData = Bill(
-        id: widget.bill?.id ?? '', // Pakai ID lama jika edit, kosong jika baru
+        id: widget.bill?.id ?? '',
         title: title,
         amount: amount,
         dueDate: dueDate!,
@@ -108,33 +109,45 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
         repeat: repeat,
         userId: user.uid,
         createdAt: widget.bill?.createdAt ?? Timestamp.now(),
-
-        // JANGAN LUPA: Bawa status lunas yang lama!
-        // Jika edit, ambil status dari widget.bill. Jika baru, false.
         isPaid: widget.bill?.isPaid ?? false,
       );
 
-      if (widget.bill == null) {
-        // Create Baru
-        await repo.createBill(billData).timeout(const Duration(seconds: 5));
-      } else {
-        // Update (Edit)
-        await repo.updateBill(billData).timeout(const Duration(seconds: 5));
-      }
+      final billsController = ref.read(billsControllerProvider);
 
-      navigator.pop(); // Kembali ke list screen
-    } catch (e) {
-      if (mounted) {
-        setState(() => _loading = false);
-        messenger.showSnackBar(SnackBar(content: Text('$errorSave $e')));
+      if (widget.bill == null) {
+        print('>>> calling controller.addBill');
+        await billsController.addBill(billData);
+        print('>>> addBill completed');
+        if (!mounted) return;
+        messenger.showSnackBar(SnackBar(content: Text(isIndo ? 'Berhasil disimpan' : 'Saved')));
+        navigator.pop();
+      } else {
+        print('>>> calling controller.editBill');
+        await billsController.editBill(billData);
+        print('>>> editBill completed');
+        if (!mounted) return;
+        messenger.showSnackBar(SnackBar(content: Text(isIndo ? 'Perubahan tersimpan' : 'Changes saved')));
+        navigator.pop();
       }
+    } on TimeoutException {
+      print('>>> TimeoutException in _submit');
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(timeoutMsg)));
+    } catch (e, st) {
+      print('>>> ERROR in _submit: $e');
+      debugPrintStack(stackTrace: st);
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text('$errorSave $e')));
+    } finally {
+      print('>>> SUBMIT FINALLY - reset loading');
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentLocale = ref.watch(localeProvider);
-    final isIndo = currentLocale.languageCode == 'id';
+    final locale = ref.watch(localeProvider);
+    final isIndo = locale.languageCode == 'id';
 
     final labels = {
       'appbar_add': isIndo ? 'Tambah Tagihan' : 'Add Bill',
@@ -166,8 +179,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 initialValue: title,
                 decoration: InputDecoration(labelText: labels['label_title']),
                 onChanged: (v) => title = v,
-                validator: (v) =>
-                    v != null && v.isNotEmpty ? null : labels['valid_required'],
+                validator: (v) => v != null && v.isNotEmpty ? null : labels['valid_required'],
               ),
               const SizedBox(height: 8),
 
@@ -177,9 +189,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 decoration: InputDecoration(labelText: labels['label_amount']),
                 keyboardType: TextInputType.number,
                 onChanged: (v) => amount = double.tryParse(v) ?? 0.0,
-                validator: (v) => (v != null && double.tryParse(v) != null)
-                    ? null
-                    : labels['valid_number'],
+                validator: (v) => (v != null && double.tryParse(v) != null) ? null : labels['valid_number'],
               ),
               const SizedBox(height: 8),
 
@@ -189,9 +199,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 title: Text(
                   dueDate == null
                       ? labels['label_date']!
-                      : DateFormat.yMMMd(
-                          currentLocale.languageCode,
-                        ).format(dueDate!),
+                      : DateFormat.yMMMd(locale.toString()).format(dueDate!),
                   style: TextStyle(
                     color: dueDate == null ? Colors.grey[700] : Colors.black,
                   ),
@@ -203,7 +211,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                     initialDate: dueDate ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
-                    locale: currentLocale,
+                    locale: locale,
                   );
                   if (picked != null) {
                     setState(() => dueDate = picked);
@@ -215,7 +223,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
 
               // --- Kategori ---
               DropdownButtonFormField<String>(
-                value: _categoriesIds.contains(category) ? category : null,
+                initialValue: _categoriesIds.contains(category) ? category : null,
                 decoration: InputDecoration(
                   labelText: labels['label_category'],
                   border: const UnderlineInputBorder(),
@@ -249,8 +257,7 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                     category = newValue ?? 'Lainnya';
                   });
                 },
-                validator: (value) =>
-                    value == null ? labels['valid_required'] : null,
+                validator: (value) => value == null ? labels['valid_required'] : null,
               ),
               const SizedBox(height: 8),
 
@@ -272,10 +279,10 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                   ),
                   child: _loading
                       ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                       : Text(labels['btn_save']!),
                 ),
               ),
