@@ -24,6 +24,11 @@ class BillRepository {
     await ref.doc(bill.id).update(bill.toMap());
   }
 
+  Future<void> updateBillStatus(String uid, String billId, bool isPaid) async {
+    final ref = billsRef(uid);
+    await ref.doc(billId).update({'isPaid': isPaid});
+  }
+
   Future<void> deleteBill(String uid, String billId) async {
     final ref = billsRef(uid);
     await ref.doc(billId).delete();

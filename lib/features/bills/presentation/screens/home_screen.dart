@@ -5,8 +5,8 @@ import '../../providers/bills_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'bill_detail_screen.dart';
 import 'bill_form_screen.dart';
-import '../../../settings/providers/locale_provider.dart'; 
-import '../../../settings/presentation/screens/settings_screen.dart'; 
+import '../../../settings/providers/locale_provider.dart';
+import '../../../settings/presentation/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,7 +25,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final auth = ref.watch(authServiceProvider);
     final user = auth.currentUser;
     final billsAsync = ref.watch(billsStreamProvider);
-    
+    final billsController = ref.watch(billsControllerProvider);
+
     // 1. AMBIL STATUS BAHASA SAAT INI
     final currentLocale = ref.watch(localeProvider);
     final isIndo = currentLocale.languageCode == 'id';
@@ -38,7 +39,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'reset': isIndo ? 'Hapus Filter' : 'Reset Filter',
       'list_title': isIndo ? 'Daftar Pembayaran' : 'Payment List',
       'payment': isIndo ? 'Pembayaran' : 'Payment',
-      'empty_list': isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
+      'empty_list': isIndo
+          ? 'Belum ada catatan pembayaran'
+          : 'No payment records yet',
       'empty_filter': isIndo ? 'Tidak ada tagihan' : 'No bills for',
       'due_date': isIndo ? 'Jatuh tempo' : 'Due date',
       'logout_tooltip': isIndo ? 'Keluar' : 'Logout',
@@ -48,10 +51,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // 3. DATA KATEGORI (Icon & Label Terjemahan)
     // 'id' harus sama dengan data yang disimpan di database untuk filtering
     final categories = [
-      {'id': 'PDAM', 'label': isIndo ? 'PDAM' : 'Water', 'icon': Icons.water_drop_outlined},
-      {'id': 'PLN', 'label': isIndo ? 'PLN' : 'Electricity', 'icon': Icons.electric_bolt_outlined},
-      {'id': 'Pendidikan', 'label': isIndo ? 'Pendidikan' : 'Education', 'icon': Icons.school_outlined},
-      {'id': 'Internet', 'label': isIndo ? 'Internet' : 'Internet', 'icon': Icons.wifi},
+      {
+        'id': 'PDAM',
+        'label': isIndo ? 'PDAM' : 'Water',
+        'icon': Icons.water_drop_outlined,
+      },
+      {
+        'id': 'PLN',
+        'label': isIndo ? 'PLN' : 'Electricity',
+        'icon': Icons.electric_bolt_outlined,
+      },
+      {
+        'id': 'Pendidikan',
+        'label': isIndo ? 'Pendidikan' : 'Education',
+        'icon': Icons.school_outlined,
+      },
+      {
+        'id': 'Internet',
+        'label': isIndo ? 'Internet' : 'Internet',
+        'icon': Icons.wifi,
+      },
     ];
 
     return Scaffold(
@@ -69,7 +88,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
+          ),
           // Tombol Setting (Gerigi)
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -105,12 +127,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            labels['header']!, 
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            labels['header']!,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            user != null ? '${labels['hello']}, ${user.email}' : '${labels['hello']}, user',
+                            user != null
+                                ? '${labels['hello']}, ${user.email}'
+                                : '${labels['hello']}, user',
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],
@@ -123,7 +149,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.home_outlined, size: 32, color: Colors.blueAccent),
+                      child: const Icon(
+                        Icons.home_outlined,
+                        size: 32,
+                        color: Colors.blueAccent,
+                      ),
                     ),
                   ],
                 ),
@@ -135,12 +165,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(labels['categories_title']!, style: theme.textTheme.titleMedium),
+                  Text(
+                    labels['categories_title']!,
+                    style: theme.textTheme.titleMedium,
+                  ),
                   // Jika filter aktif, tampilkan tombol Reset
                   if (_selectedCategory != null)
                     TextButton(
                       onPressed: () => setState(() => _selectedCategory = null),
-                      child: Text(labels['reset']!, style: const TextStyle(color: Colors.red)),
+                      child: Text(
+                        labels['reset']!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     )
                   else
                     // Jika tidak ada filter, tampilkan tombol shortcut tambah (PENGGANTI FAB)
@@ -148,7 +184,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       icon: const Icon(Icons.add_circle_outline),
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const BillFormScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const BillFormScreen(),
+                        ),
                       ),
                     ),
                 ],
@@ -165,7 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, i) {
                     final cat = categories[i];
-                    final id = cat['id'] as String; 
+                    final id = cat['id'] as String;
                     final label = cat['label'] as String;
                     final isSelected = _selectedCategory == id;
 
@@ -186,9 +224,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           // Ubah warna background jika dipilih
-                          color: isSelected ? Colors.blueAccent : const Color(0xFFDFF7F7),
+                          color: isSelected
+                              ? Colors.blueAccent
+                              : const Color(0xFFDFF7F7),
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected ? Border.all(color: Colors.blue.shade800, width: 2) : null,
+                          border: isSelected
+                              ? Border.all(
+                                  color: Colors.blue.shade800,
+                                  width: 2,
+                                )
+                              : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -198,15 +243,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               backgroundColor: Colors.white,
                               child: Icon(
                                 cat['icon'] as IconData,
-                                color: isSelected ? Colors.blueAccent : Colors.blueAccent,
+                                color: isSelected
+                                    ? Colors.blueAccent
+                                    : Colors.blueAccent,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: isSelected ? Colors.white : Colors.black87,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -225,10 +276,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedCategory == null 
-                        ? labels['list_title']! 
-                        : '${labels['payment']} ($_selectedCategory)', 
-                    style: theme.textTheme.titleMedium
+                    _selectedCategory == null
+                        ? labels['list_title']!
+                        : '${labels['payment']} ($_selectedCategory)',
+                    style: theme.textTheme.titleMedium,
                   ),
                 ],
               ),
@@ -238,10 +289,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               billsAsync.when(
                 data: (bills) {
                   var filteredBills = bills;
-                  
+
                   // LOGIKA FILTER DATA
                   if (_selectedCategory != null) {
-                    filteredBills = bills.where((b) => b.category == _selectedCategory).toList();
+                    filteredBills = bills
+                        .where((b) => b.category == _selectedCategory)
+                        .toList();
                   }
 
                   if (filteredBills.isEmpty) {
@@ -250,13 +303,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(Icons.search_off, size: 48, color: Colors.grey[300]),
+                            Icon(
+                              Icons.search_off,
+                              size: 48,
+                              color: Colors.grey[300],
+                            ),
                             const SizedBox(height: 8),
                             Text(
-                              _selectedCategory == null 
+                              _selectedCategory == null
                                   ? labels['empty_list']!
                                   : '${labels['empty_filter']} $_selectedCategory',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -272,41 +331,128 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          color: const Color(0xFFF5F6FA),
+                          // Ubah warna card jika lunas
+                          color: b.isPaid
+                              ? Colors.green[50]
+                              : const Color(0xFFF5F6FA),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-                            leading: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+
+                            // [FITUR 1] CHECKBOX LUNAS
+                            leading: Checkbox(
+                              value: b.isPaid,
+                              onChanged: (val) {
+                                if (val != null) {
+                                  billsController.toggleStatus(b.id, val);
+                                }
+                              },
+                            ),
+
+                            // [FITUR 2] STRIKETHROUGH JUDUL
+                            title: Text(
+                              b.title,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                decoration: b.isPaid
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: b.isPaid ? Colors.grey : Colors.black,
                               ),
-                              child: Icon(
-                                b.category == 'PDAM' ? Icons.water_drop_outlined :
-                                b.category == 'PLN' ? Icons.electric_bolt_outlined :
-                                b.category == 'Pendidikan' ? Icons.school_outlined :
-                                b.category == 'Internet' ? Icons.wifi : Icons.receipt_long,
-                                color: Colors.orange,
-                              ),
                             ),
-                            title: Text(b.title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            subtitle: Text(
-                              // Format Tanggal sesuai Locale
-                              '${labels['due_date']}: ${DateFormat.yMMMd(currentLocale.languageCode).format(b.dueDate)}',
-                              style: const TextStyle(fontSize: 12),
+
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${labels['due_date']}: ${DateFormat.yMMMd(currentLocale.languageCode).format(b.dueDate)}',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                // Harga dipindah ke sini agar muat tombol aksi
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: currentLocale.languageCode == 'id'
+                                        ? 'id_ID'
+                                        : 'en_US',
+                                    symbol: currentLocale.languageCode == 'id'
+                                        ? 'Rp '
+                                        : '\$ ',
+                                    decimalDigits: 0,
+                                  ).format(b.amount),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
                             ),
-                            trailing: Text(
-                              // Format Mata Uang sesuai Locale (Rp atau $)
-                              NumberFormat.currency(
-                                locale: currentLocale.languageCode == 'id' ? 'id_ID' : 'en_US',
-                                symbol: currentLocale.languageCode == 'id' ? 'Rp ' : '\$ ',
-                                decimalDigits: 0,
-                              ).format(b.amount),
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+
+                            // [FITUR 3] TOMBOL EDIT & HAPUS
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // EDIT
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    size: 20,
+                                    color: Colors.blue,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BillFormScreen(bill: b),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // HAPUS
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Hapus?'),
+                                        content: Text(
+                                          'Yakin hapus ${b.title}?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(ctx),
+                                            child: const Text('Batal'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              billsController.deleteBill(b.id);
+                                              Navigator.pop(ctx);
+                                            },
+                                            child: const Text(
+                                              'Hapus',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
+
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -322,7 +468,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   );
                 },
                 loading: () => const Center(
-                  child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
                 error: (e, st) => Text('Error: $e'),
               ),
@@ -332,7 +481,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-      // Tombol FAB (+) dihapus di sini
     );
   }
 }

@@ -10,6 +10,7 @@ class Bill {
   final String repeat; // e.g. 'none', 'monthly', 'yearly'
   final String userId;
   final Timestamp createdAt;
+  final bool isPaid;
 
   Bill({
     required this.id,
@@ -21,6 +22,7 @@ class Bill {
     required this.repeat,
     required this.userId,
     required this.createdAt,
+    this.isPaid = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,7 @@ class Bill {
       'repeat': repeat,
       'userId': userId,
       'createdAt': createdAt,
+      'isPaid': isPaid,
     };
   }
 
@@ -41,13 +44,16 @@ class Bill {
     return Bill(
       id: doc.id,
       title: data['title'] as String? ?? '',
-      amount: (data['amount'] is int) ? (data['amount'] as int).toDouble() : (data['amount'] as num?)?.toDouble() ?? 0.0,
+      amount: (data['amount'] is int)
+          ? (data['amount'] as int).toDouble()
+          : (data['amount'] as num?)?.toDouble() ?? 0.0,
       dueDate: (data['dueDate'] as Timestamp).toDate(),
       category: data['category'] as String? ?? '',
       notes: data['notes'] as String?,
       repeat: data['repeat'] as String? ?? 'none',
       userId: data['userId'] as String? ?? '',
       createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      isPaid: data['isPaid'] as bool? ?? false,
     );
   }
 }
