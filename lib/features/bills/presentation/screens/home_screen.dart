@@ -76,6 +76,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     ];
 
+    // Helper: choose correct locale strings for intl package
+    final currencyLocale = isIndo ? 'id_ID' : 'en_US';
+    final dateLocale = isIndo ? 'id_ID' : 'en_US';
+    final currencySymbol = isIndo ? 'Rp': 'Rp';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -118,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     duration: const Duration(seconds: 2),
                   ),
                 );
-                // Navigator.of(context).pushReplacementNamed('/login');
+                // optional: navigate to login
               } catch (e) {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -306,9 +311,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedCategory == null
-                        ? labels['list_title']!
-                        : '${labels['payment']} ($_selectedCategory)',
+                    _selectedCategory == null ? labels['list_title']! : '${labels['payment']} ($_selectedCategory)',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -366,9 +369,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             // [FITUR 1] CHECKBOX LUNAS
                             leading: Checkbox(
                               value: b.isPaid,
-                              onChanged: (val) {
+                              onChanged: (val) async {
                                 if (val != null) {
-                                  billsController.toggleStatus(b.id, val);
+                                  try {
+                                    await billsController.toggleStatus(b.id, val);
+                                  } catch (e) {
+                                    // show simple feedback
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Update failed: $e')),
+                                      );
+                                    }
+                                  }
                                 }
                               },
                             ),
@@ -387,13 +399,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${labels['due_date']}: ${DateFormat.yMMMd(currentLocale.toString()).format(b.dueDate)}',
+                                  '${labels['due_date']}: ${DateFormat.yMMMd(dateLocale).format(b.dueDate)}',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
                                   NumberFormat.currency(
-                                    locale: currentLocale.toString(),
-                                    symbol: currentLocale.languageCode == 'id' ? 'Rp',
+                                    locale: currencyLocale,
+                                    symbol: currencySymbol,
                                     decimalDigits: 0,
                                   ).format(b.amount),
                                   style: const TextStyle(
