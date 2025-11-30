@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/bills_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../models/bill_model.dart'; // Pastikan import ini ada
 import 'bill_detail_screen.dart';
 import 'bill_form_screen.dart';
 import '../../../settings/providers/locale_provider.dart';
@@ -16,8 +17,142 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  // Variabel untuk menyimpan kategori yang sedang dipilih
   String? _selectedCategory;
+
+  // --- FUNGSI BARU: MENAMPILKAN POPUP RINGKASAN ---
+  void _showSummaryPopup(BuildContext context, List<Bill> allBills) {
+    // 1. Filter Data
+    final unpaidBills = allBills.where((b) => !b.isPaid).toList();
+    final paidBills = allBills.where((b) => b.isPaid).toList();
+
+    // 2. Hitung Total Tagihan (Yang belum dibayar)
+    double totalUnpaid = 0;
+    for (var bill in unpaidBills) {
+      totalUnpaid += bill.amount;
+    }
+
+    // Formatter Rupiah
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 500, // Tinggi popup
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- HEADER POPUP ---
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              
+              // --- BAGIAN 1: TOTAL YANG HARUS DIBAYAR ---
+              const Text(
+                'Total Tagihan Aktif',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade100),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      currencyFormatter.format(totalUnpaid),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${unpaidBills.length} tagihan belum lunas',
+                      style: TextStyle(color: Colors.red.shade400),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // --- BAGIAN 2: DAFTAR YANG SUDAH LUNAS ---
+              const Text(
+                'Riwayat Lunas',
+                style: TextStyle(
+                  fontSize: 16, 
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87
+                ),
+              ),
+              const SizedBox(height: 10),
+              
+              Expanded(
+                child: paidBills.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Belum ada tagihan lunas',
+                          style: TextStyle(color: Colors.grey[400]),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: paidBills.length,
+                        separatorBuilder: (_, __) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final bill = paidBills[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const CircleAvatar(
+                              backgroundColor: Colors.green,
+                              radius: 16,
+                              child: Icon(Icons.check, color: Colors.white, size: 16),
+                            ),
+                            title: Text(
+                              bill.title,
+                              style: const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: Text(
+                              currencyFormatter.format(bill.amount),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +162,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final billsAsync = ref.watch(billsStreamProvider);
     final billsController = ref.watch(billsControllerProvider);
 
-    // 1. AMBIL STATUS BAHASA SAAT INI
     final currentLocale = ref.watch(localeProvider);
     final isIndo = currentLocale.languageCode == 'id';
 
-    // 2. (Terjemahan Home)
     final labels = {
       'header': isIndo ? 'Jangan lupa bayar!' : "Don't forget to pay!",
       'hello': isIndo ? 'Halo' : 'Hello',
@@ -52,41 +185,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'logout_failed': isIndo ? 'Gagal keluar' : 'Failed to logout',
     };
 
-    // 3. DATA KATEGORI (Icon & Label Terjemahan)
     final categories = [
-      {
-        'id': 'PDAM',
-        'label': isIndo ? 'PDAM' : 'Water',
-        'icon': Icons.water_drop_outlined,
-      },
-      {
-        'id': 'PLN',
-        'label': isIndo ? 'PLN' : 'Electricity',
-        'icon': Icons.electric_bolt_outlined,
-      },
-      {
-        'id': 'Pendidikan',
-        'label': isIndo ? 'Pendidikan' : 'Education',
-        'icon': Icons.school_outlined,
-      },
-      {
-        'id': 'Internet',
-        'label': isIndo ? 'Internet' : 'Internet',
-        'icon': Icons.wifi,
-      },
+      {'id': 'PDAM', 'label': isIndo ? 'PDAM' : 'Water', 'icon': Icons.water_drop_outlined},
+      {'id': 'PLN', 'label': isIndo ? 'PLN' : 'Electricity', 'icon': Icons.electric_bolt_outlined},
+      {'id': 'Pendidikan', 'label': isIndo ? 'Pendidikan' : 'Education', 'icon': Icons.school_outlined},
+      {'id': 'Internet', 'label': isIndo ? 'Internet' : 'Internet', 'icon': Icons.wifi},
     ];
 
-    // Helper: choose correct locale strings for intl package
     final currencyLocale = isIndo ? 'id_ID' : 'en_US';
     final dateLocale = isIndo ? 'id_ID' : 'en_US';
-    final currencySymbol = isIndo ? 'Rp': 'Rp';
+    final currencySymbol = isIndo ? 'Rp' : 'Rp';
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        // Tombol Logout
         leading: IconButton(
           icon: const Icon(Icons.logout),
           tooltip: labels['logout_tooltip'],
@@ -103,10 +217,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: Text(
-                      labels['logout']!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+                    child: Text(labels['logout']!, style: const TextStyle(color: Colors.red)),
                   ),
                 ],
               ),
@@ -117,38 +228,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               try {
                 await auth.logout();
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(labels['logout_success']!),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-                // optional: navigate to login
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(labels['logout_success']!), duration: const Duration(seconds: 2)));
               } catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(labels['logout_failed']!),
-                  ),
-                );
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(labels['logout_failed']!)));
               }
             }
           },
         ),
         actions: [
+          // --- MODIFIKASI: Tombol Notifikasi (Lonceng) ---
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              // Mengambil data bills saat ini dari provider (jika sudah di-load)
+              billsAsync.whenData((bills) {
+                _showSummaryPopup(context, bills);
+              });
+            },
           ),
-          // Tombol Setting
+          // -----------------------------------------------
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: labels['settings_tooltip'],
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
             },
           ),
         ],
@@ -161,7 +265,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
-              // --- HEADER USER ---
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -176,9 +279,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             labels['header']!,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -191,55 +292,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Container(
                       width: 68,
                       height: 68,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.home_outlined,
-                        size: 32,
-                        color: Colors.blueAccent,
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.home_outlined, size: 32, color: Colors.blueAccent),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 14),
-
-              // --- BAGIAN PILIHAN KATEGORI (FILTER) ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    labels['categories_title']!,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  // Jika filter aktif, tampilkan tombol Reset
+                  Text(labels['categories_title']!, style: theme.textTheme.titleMedium),
                   if (_selectedCategory != null)
                     TextButton(
                       onPressed: () => setState(() => _selectedCategory = null),
-                      child: Text(
-                        labels['reset']!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                      child: Text(labels['reset']!, style: const TextStyle(color: Colors.red)),
                     )
                   else
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const BillFormScreen(),
-                        ),
-                      ),
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillFormScreen())),
                     ),
                 ],
               ),
-
               const SizedBox(height: 6),
-
-              // List Horizontal Kategori
               SizedBox(
                 height: 96,
                 child: ListView.separated(
@@ -269,12 +345,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         decoration: BoxDecoration(
                           color: isSelected ? Colors.blueAccent : const Color(0xFFDFF7F7),
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected
-                              ? Border.all(
-                            color: Colors.blue.shade800,
-                            width: 2,
-                          )
-                              : null,
+                          border: isSelected ? Border.all(color: Colors.blue.shade800, width: 2) : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -282,10 +353,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             CircleAvatar(
                               radius: 22,
                               backgroundColor: Colors.white,
-                              child: Icon(
-                                cat['icon'] as IconData,
-                                color: isSelected ? Colors.blueAccent : Colors.blueAccent,
-                              ),
+                              child: Icon(cat['icon'] as IconData, color: isSelected ? Colors.blueAccent : Colors.blueAccent),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -303,10 +371,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   },
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // --- DAFTAR TAGIHAN ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -316,14 +381,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
-
               billsAsync.when(
                 data: (bills) {
                   var filteredBills = bills;
-
-                  // FILTER DATA
                   if (_selectedCategory != null) {
                     filteredBills = bills.where((b) => b.category == _selectedCategory).toList();
                   }
@@ -334,11 +395,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 48,
-                              color: Colors.grey[300],
-                            ),
+                            Icon(Icons.search_off, size: 48, color: Colors.grey[300]),
                             const SizedBox(height: 8),
                             Text(
                               _selectedCategory == null ? labels['empty_list']! : '${labels['empty_filter']} $_selectedCategory',
@@ -358,15 +415,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          // Ubah warna card jika lunas
                           color: b.isPaid ? Colors.green[50] : const Color(0xFFF5F6FA),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           child: ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-
-                            // [FITUR 1] CHECKBOX LUNAS
                             leading: Checkbox(
                               value: b.isPaid,
                               onChanged: (val) async {
@@ -374,18 +426,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   try {
                                     await billsController.toggleStatus(b.id, val);
                                   } catch (e) {
-                                    // show simple feedback
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Update failed: $e')),
-                                      );
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: $e')));
                                     }
                                   }
                                 }
                               },
                             ),
-
-                            // [FITUR 2]JUDUL
                             title: Text(
                               b.title,
                               style: TextStyle(
@@ -394,7 +441,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 color: b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
-
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -403,47 +449,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat.currency(
-                                    locale: currencyLocale,
-                                    symbol: currencySymbol,
-                                    decimalDigits: 0,
-                                  ).format(b.amount),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: Colors.green,
-                                  ),
+                                  NumberFormat.currency(locale: currencyLocale, symbol: currencySymbol, decimalDigits: 0).format(b.amount),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
                                 ),
                               ],
                             ),
-
-                            // [FITUR 3] TOMBOL EDIT & HAPUS
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // EDIT
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    size: 20,
-                                    color: Colors.blue,
-                                  ),
+                                  icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BillFormScreen(bill: b),
-                                      ),
-                                    );
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => BillFormScreen(bill: b)));
                                   },
                                 ),
-                                // HAPUS
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    size: 20,
-                                    color: Colors.red,
-                                  ),
+                                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
@@ -451,19 +472,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         title: const Text('Hapus?'),
                                         content: Text('Yakin hapus ${b.title}?'),
                                         actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(ctx),
-                                            child: const Text('Batal'),
-                                          ),
+                                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
                                           TextButton(
                                             onPressed: () {
                                               billsController.deleteBill(b.id);
                                               Navigator.pop(ctx);
                                             },
-                                            child: const Text(
-                                              'Hapus',
-                                              style: TextStyle(color: Colors.red),
-                                            ),
+                                            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
                                           ),
                                         ],
                                       ),
@@ -472,14 +487,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ],
                             ),
-
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BillDetailScreen(bill: b),
-                                ),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => BillDetailScreen(bill: b)));
                             },
                           ),
                         ),
@@ -487,18 +496,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     }).toList(),
                   );
                 },
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                error: (e, st) => Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text('Error: $e'),
-                ),
+                loading: () => const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator())),
+                error: (e, st) => Padding(padding: const EdgeInsets.all(12.0), child: Text('Error: $e')),
               ),
-
               const SizedBox(height: 80),
             ],
           ),
