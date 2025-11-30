@@ -42,31 +42,39 @@ class NotificationService {
     required String body,
     required DateTime date,
   }) async {
-    // Set waktu notifikasi ke jam 09:00 pagi pada tanggal jatuh tempo
-    final scheduledDate = DateTime(date.year, date.month, date.day, 9, 0);
-    
-    // Jangan jadwalkan jika waktu sudah lewat
-    if (scheduledDate.isBefore(DateTime.now())) return;
+    final scheduledDate = DateTime(date.year, date.month, date.day, 23, 0);
 
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'bills_channel', // Id Channel
-          'Pengingat Tagihan', // Nama Channel
-          channelDescription: 'Notifikasi untuk tagihan jatuh tempo',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
+    const notificationDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'bills_channel',
+        'Pengingat Tagihan',
+        channelDescription: 'Notifikasi untuk tagihan jatuh tempo',
+        importance: Importance.max,
+        priority: Priority.high,
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      iOS: DarwinNotificationDetails(),
     );
+
+    if (scheduledDate.isBefore(DateTime.now())) {
+      await _plugin.show(
+        id,
+        title,
+        body,
+        notificationDetails,
+      );
+    } else {
+      // KONDISI B: Jika waktu belum lewat -> JADWALKAN sesuai tanggal
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(scheduledDate, tz.local),
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   // Batalkan Notifikasi
