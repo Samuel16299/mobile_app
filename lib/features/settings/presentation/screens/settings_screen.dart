@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/locale_provider.dart';
+import '../../../bills/providers/bills_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,7 +28,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          
+
           // Card untuk pilihan Bahasa
           Card(
             elevation: 0,
@@ -57,13 +58,37 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          
+
+          // --- [TAMBAHAN] TOMBOL TEST NOTIFIKASI ---
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                // Panggil fungsi test dari service
+                await ref.read(notificationServiceProvider).showInstantNotification();
+              },
+              icon: const Icon(Icons.notifications_active_outlined),
+              label: const Text('Coba Test Notifikasi'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+                backgroundColor: Colors.blue.shade50,
+                foregroundColor: Colors.blue.shade700,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+          // -----------------------------------------
+
           const SizedBox(height: 20),
           Center(
             child: Text(
-              isIndo 
-                ? 'Geser tombol di atas untuk ganti ke Bahasa Inggris' 
-                : 'Toggle the switch above to change to Indonesian',
+              isIndo
+                  ? 'Geser tombol di atas untuk ganti ke Bahasa Inggris'
+                  : 'Toggle the switch above to change to Indonesian',
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.grey),
             ),
