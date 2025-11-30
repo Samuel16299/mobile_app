@@ -65,11 +65,39 @@ class SettingsScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: ElevatedButton.icon(
               onPressed: () async {
-                // Panggil fungsi test dari service
-                await ref.read(notificationServiceProvider).showInstantNotification();
+                try {
+                  // 1. Panggil fungsi test dari service
+                  await ref.read(notificationServiceProvider).showInstantNotification();
+                  
+                  // 2. Cek apakah widget masih aktif sebelum menampilkan SnackBar
+                  if (!context.mounted) return;
+
+                  // 3. Tampilkan pesan konfirmasi sukses
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isIndo 
+                          ? 'Perintah notifikasi berhasil dikirim!' 
+                          : 'Notification signal sent!',
+                      ),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                } catch (e) {
+                  // 4. Tampilkan pesan jika terjadi error
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
               icon: const Icon(Icons.notifications_active_outlined),
-              label: const Text('Coba Test Notifikasi'),
+              // Label tombol juga dibuat bilingual agar konsisten
+              label: Text(isIndo ? 'Coba Test Notifikasi' : 'Test Notification'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
                 backgroundColor: Colors.blue.shade50,
