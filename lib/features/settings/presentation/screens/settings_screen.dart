@@ -66,26 +66,28 @@ class SettingsScreen extends ConsumerWidget {
             child: ElevatedButton.icon(
               onPressed: () async {
                 try {
-                  // 1. Panggil fungsi test dari service
-                  await ref.read(notificationServiceProvider).showInstantNotification();
+                  final notifService = ref.read(notificationServiceProvider);
                   
-                  // 2. Cek apakah widget masih aktif sebelum menampilkan SnackBar
+                  // 1. Minta Izin Dulu (PENTING untuk Android 13+)
+                  await notifService.requestPermissions();
+
+                  // 2. Panggil fungsi test notifikasi
+                  await notifService.showInstantNotification();
+                  
                   if (!context.mounted) return;
 
-                  // 3. Tampilkan pesan konfirmasi sukses
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         isIndo 
-                          ? 'Perintah notifikasi berhasil dikirim!' 
-                          : 'Notification signal sent!',
+                          ? 'Perintah notifikasi dikirim! Cek status bar.' 
+                          : 'Notification sent! Check status bar.',
                       ),
                       backgroundColor: Colors.green,
                       duration: const Duration(seconds: 2),
                     ),
                   );
                 } catch (e) {
-                  // 4. Tampilkan pesan jika terjadi error
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -96,17 +98,8 @@ class SettingsScreen extends ConsumerWidget {
                 }
               },
               icon: const Icon(Icons.notifications_active_outlined),
-              // Label tombol juga dibuat bilingual agar konsisten
               label: Text(isIndo ? 'Coba Test Notifikasi' : 'Test Notification'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-                backgroundColor: Colors.blue.shade50,
-                foregroundColor: Colors.blue.shade700,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              // ... style tombol tetap sama ...
             ),
           ),
           // -----------------------------------------
