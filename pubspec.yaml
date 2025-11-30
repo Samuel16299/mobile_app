@@ -25,6 +25,9 @@ dependencies:
   uuid: ^4.4.2
   intl: ^0.20.2
 
+  flutter_local_notifications: ^17.0.0
+  timezone: ^0.9.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

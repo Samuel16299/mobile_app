@@ -14,9 +14,10 @@ class BillRepository {
         .map((snap) => snap.docs.map((d) => Bill.fromDoc(d)).toList());
   }
 
-  Future<void> createBill(Bill bill) async {
+  Future<String> createBill(Bill bill) async {
     final ref = billsRef(bill.userId);
-    await ref.add(bill.toMap());
+    final doc = await ref.add(bill.toMap());
+    return doc.id;
   }
 
   Future<void> updateBill(Bill bill) async {

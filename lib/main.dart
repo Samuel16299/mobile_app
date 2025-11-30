@@ -8,11 +8,12 @@ import 'features/settings/providers/locale_provider.dart';
 import 'features/bills/providers/auth_provider.dart';
 import 'features/bills/presentation/screens/login_screen.dart';
 import 'features/bills/presentation/screens/home_screen.dart';
+import 'core/service/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  await NotificationService().init();
 
   runApp(const ProviderScope(child: MyApp()));
 }
