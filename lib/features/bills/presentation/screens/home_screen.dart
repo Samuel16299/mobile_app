@@ -21,18 +21,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isTotalVisible = true;
 
   Widget _buildTotalBalanceCard(
-    AsyncValue<List<Bill>> billsAsync,
-    NumberFormat formatter,
-  ) {
-    // Menghitung total tagihan yang belum dibayar
+      AsyncValue<List<Bill>> billsAsync,
+      NumberFormat formatter,
+      ) {
     final double totalAmount = billsAsync.maybeWhen(
       data: (bills) => bills
-          .where((b) => !b.isPaid) // Ambil yang belum lunas
-          .fold(0.0, (sum, item) => sum + item.amount), // Jumlahkan
+          .where((b) => !b.isPaid)
+          .fold(0.0, (sum, item) => sum + item.amount),
       orElse: () => 0.0,
     );
 
-    // Menghitung jumlah item yang belum lunas
     final int unpaidCount = billsAsync.maybeWhen(
       data: (bills) => bills.where((b) => !b.isPaid).length,
       orElse: () => 0,
@@ -40,10 +38,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 24), // Jarak ke bawah (ke kategori)
+      margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        // Desain Gradasi Biru agar terlihat modern
         gradient: const LinearGradient(
           colors: [Color(0xFF4A90E2), Color(0xFF0073E6)],
           begin: Alignment.topLeft,
@@ -72,7 +69,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              // Tombol Mata (Hide/Show)
               InkWell(
                 onTap: () {
                   setState(() {
@@ -94,11 +90,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          // Teks Nominal Uang
           Text(
-            _isTotalVisible
-                ? formatter.format(totalAmount)
-                : 'Rp * * * * * * *', // Sensor jika disembunyikan
+            _isTotalVisible ? formatter.format(totalAmount) : 'Rp * * * * * * *',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -107,7 +100,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          // Info tambahan kecil di bawah
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -124,19 +116,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- FUNGSI BARU: MENAMPILKAN POPUP RINGKASAN ---
   void _showSummaryPopup(BuildContext context, List<Bill> allBills) {
-    // 1. Filter Data
     final unpaidBills = allBills.where((b) => !b.isPaid).toList();
     final paidBills = allBills.where((b) => b.isPaid).toList();
 
-    // 2. Hitung Total Tagihan (Yang belum dibayar)
     double totalUnpaid = 0;
     for (var bill in unpaidBills) {
       totalUnpaid += bill.amount;
     }
 
-    // Formatter Rupiah
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -151,11 +139,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(20),
-          height: 500, // Tinggi popup
+          height: 500,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER POPUP ---
               Center(
                 child: Container(
                   width: 40,
@@ -167,8 +154,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-
-              // --- BAGIAN 1: TOTAL YANG HARUS DIBAYAR ---
               const Text(
                 'Total Tagihan Aktif',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
@@ -200,10 +185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
-              // --- BAGIAN 2: DAFTAR YANG SUDAH LUNAS ---
               const Text(
                 'Riwayat Lunas',
                 style: TextStyle(
@@ -213,48 +195,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-
               Expanded(
                 child: paidBills.isEmpty
                     ? Center(
-                        child: Text(
-                          'Belum ada tagihan lunas',
-                          style: TextStyle(color: Colors.grey[400]),
-                        ),
-                      )
+                  child: Text(
+                    'Belum ada tagihan lunas',
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+                )
                     : ListView.separated(
-                        itemCount: paidBills.length,
-                        separatorBuilder: (_, __) => const Divider(),
-                        itemBuilder: (context, index) {
-                          final bill = paidBills[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 16,
-                              child: Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                            title: Text(
-                              bill.title,
-                              style: const TextStyle(
-                                decoration: TextDecoration.lineThrough,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            trailing: Text(
-                              currencyFormatter.format(bill.amount),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          );
-                        },
+                  itemCount: paidBills.length,
+                  separatorBuilder: (_, __) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final bill = paidBills[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.green,
+                        radius: 16,
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
+                      title: Text(
+                        bill.title,
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      trailing: Text(
+                        currencyFormatter.format(bill.amount),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -281,17 +262,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'reset': isIndo ? 'Hapus Filter' : 'Reset Filter',
       'list_title': isIndo ? 'Daftar Pembayaran' : 'Payment List',
       'payment': isIndo ? 'Pembayaran' : 'Payment',
-      'empty_list': isIndo
-          ? 'Belum ada catatan pembayaran'
-          : 'No payment records yet',
+      'empty_list': isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
       'empty_filter': isIndo ? 'Tidak ada tagihan' : 'No bills for',
       'due_date': isIndo ? 'Jatuh tempo' : 'Due date',
       'logout_tooltip': isIndo ? 'Keluar' : 'Logout',
       'settings_tooltip': isIndo ? 'Pengaturan' : 'Settings',
       'confirm_title': isIndo ? 'Konfirmasi' : 'Confirm',
-      'confirm_logout': isIndo
-          ? 'Yakin ingin keluar dari aplikasi?'
-          : 'Are you sure you want to log out?',
+      'confirm_logout': isIndo ? 'Yakin ingin keluar dari aplikasi?' : 'Are you sure you want to log out?',
       'cancel': isIndo ? 'Batal' : 'Cancel',
       'logout': isIndo ? 'Keluar' : 'Logout',
       'logout_success': isIndo ? 'Berhasil keluar' : 'Logged out',
@@ -311,7 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
       {
         'id': 'Pendidikan',
-        'label': isIndo ? 'Pendi dikan' : 'Education',
+        'label': isIndo ? 'Pendidikan' : 'Education',
         'image': 'assets/images/Pendidikan.png',
       },
       {
@@ -381,17 +358,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
         actions: [
-          // --- MODIFIKASI: Tombol Notifikasi (Lonceng) ---
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {
-              // Mengambil data bills saat ini dari provider (jika sudah di-load)
               billsAsync.whenData((bills) {
                 _showSummaryPopup(context, bills);
               });
             },
           ),
-          // -----------------------------------------------
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: labels['settings_tooltip'],
@@ -412,6 +386,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
+              // Banner sapaan
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -432,30 +407,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            user != null
-                                ? '${labels['hello']}, ${user.email}'
-                                : '${labels['hello']}, user',
+                            user != null ? '${labels['hello']}, ${user.email}' : '${labels['hello']}, user',
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],
                       ),
                     ),
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.home_outlined,
-                        size: 32,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 14),
 
               _buildTotalBalanceCard(billsAsync, currencyFormatter),
@@ -516,15 +477,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: 92,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? Colors.blueAccent
-                              : const Color(0xFFDFF7F7),
+                          color: isSelected ? Colors.blueAccent : const Color(0xFFDFF7F7),
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected
                               ? Border.all(
-                                  color: Colors.blue.shade800,
-                                  width: 2,
-                                )
+                            color: Colors.blue.shade800,
+                            width: 2,
+                          )
                               : null,
                         ),
                         child: Column(
@@ -549,12 +508,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Text(
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.black87,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                                color: isSelected ? Colors.white : Colors.black87,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -570,9 +525,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedCategory == null
-                        ? labels['list_title']!
-                        : '${labels['payment']} ($_selectedCategory)',
+                    _selectedCategory == null ? labels['list_title']! : '${labels['payment']} ($_selectedCategory)',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -582,9 +535,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 data: (bills) {
                   var filteredBills = bills;
                   if (_selectedCategory != null) {
-                    filteredBills = bills
-                        .where((b) => b.category == _selectedCategory)
-                        .toList();
+                    filteredBills = bills.where((b) => b.category == _selectedCategory).toList();
                   }
 
                   if (filteredBills.isEmpty) {
@@ -600,12 +551,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _selectedCategory == null
-                                  ? labels['empty_list']!
-                                  : '${labels['empty_filter']} $_selectedCategory',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey,
-                              ),
+                              _selectedCategory == null ? labels['empty_list']! : '${labels['empty_filter']} $_selectedCategory',
+                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -621,34 +568,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          color: b.isPaid
-                              ? Colors.green[50]
-                              : const Color(0xFFF5F6FA),
+                          color: b.isPaid ? Colors.green[50] : const Color(0xFFF5F6FA),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                             leading: Checkbox(
                               value: b.isPaid,
                               onChanged: (val) async {
                                 if (val != null) {
                                   try {
-                                    await billsController.toggleStatus(
-                                      b.id,
-                                      val,
-                                    );
+                                    await billsController.toggleStatus(b.id, val);
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Update failed: $e'),
-                                        ),
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Update failed: $e')),
                                       );
                                     }
                                   }
@@ -659,9 +594,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               b.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                decoration: b.isPaid
-                                    ? TextDecoration.lineThrough
-                                    : null,
+                                decoration: b.isPaid ? TextDecoration.lineThrough : null,
                                 color: b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
@@ -673,16 +606,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat.currency(
-                                    locale: currencyLocale,
-                                    symbol: currencySymbol,
-                                    decimalDigits: 0,
-                                  ).format(b.amount),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: Colors.green,
-                                  ),
+                                  NumberFormat.currency(locale: currencyLocale, symbol: currencySymbol, decimalDigits: 0).format(b.amount),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
                                 ),
                               ],
                             ),
@@ -690,50 +615,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    size: 20,
-                                    color: Colors.blue,
-                                  ),
+                                  icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BillFormScreen(bill: b),
-                                      ),
-                                    );
+                                    Navigator.push(context, MaterialPageRoute(builder: (_) => BillFormScreen(bill: b)));
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    size: 20,
-                                    color: Colors.red,
-                                  ),
+                                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
                                         title: const Text('Hapus?'),
-                                        content: Text(
-                                          'Yakin hapus ${b.title}?',
-                                        ),
+                                        content: Text('Yakin hapus ${b.title}?'),
                                         actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(ctx),
-                                            child: const Text('Batal'),
-                                          ),
+                                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
                                           TextButton(
                                             onPressed: () {
                                               billsController.deleteBill(b.id);
                                               Navigator.pop(ctx);
                                             },
-                                            child: const Text(
-                                              'Hapus',
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
-                                            ),
+                                            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
                                           ),
                                         ],
                                       ),
@@ -743,12 +645,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ],
                             ),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BillDetailScreen(bill: b),
-                                ),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => BillDetailScreen(bill: b)));
                             },
                           ),
                         ),
