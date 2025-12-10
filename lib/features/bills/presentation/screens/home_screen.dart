@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-              
+
               // --- BAGIAN 1: TOTAL YANG HARUS DIBAYAR ---
               const Text(
                 'Total Tagihan Aktif',
@@ -102,13 +102,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const Text(
                 'Riwayat Lunas',
                 style: TextStyle(
-                  fontSize: 16, 
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 10),
-              
+
               Expanded(
                 child: paidBills.isEmpty
                     ? Center(
@@ -127,7 +127,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             leading: const CircleAvatar(
                               backgroundColor: Colors.green,
                               radius: 16,
-                              child: Icon(Icons.check, color: Colors.white, size: 16),
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                             ),
                             title: Text(
                               bill.title,
@@ -172,13 +176,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'reset': isIndo ? 'Hapus Filter' : 'Reset Filter',
       'list_title': isIndo ? 'Daftar Pembayaran' : 'Payment List',
       'payment': isIndo ? 'Pembayaran' : 'Payment',
-      'empty_list': isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
+      'empty_list': isIndo
+          ? 'Belum ada catatan pembayaran'
+          : 'No payment records yet',
       'empty_filter': isIndo ? 'Tidak ada tagihan' : 'No bills for',
       'due_date': isIndo ? 'Jatuh tempo' : 'Due date',
       'logout_tooltip': isIndo ? 'Keluar' : 'Logout',
       'settings_tooltip': isIndo ? 'Pengaturan' : 'Settings',
       'confirm_title': isIndo ? 'Konfirmasi' : 'Confirm',
-      'confirm_logout': isIndo ? 'Yakin ingin keluar dari aplikasi?' : 'Are you sure you want to log out?',
+      'confirm_logout': isIndo
+          ? 'Yakin ingin keluar dari aplikasi?'
+          : 'Are you sure you want to log out?',
       'cancel': isIndo ? 'Batal' : 'Cancel',
       'logout': isIndo ? 'Keluar' : 'Logout',
       'logout_success': isIndo ? 'Berhasil keluar' : 'Logged out',
@@ -186,10 +194,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     };
 
     final categories = [
-      {'id': 'PDAM', 'label': isIndo ? 'PDAM' : 'Water', 'icon': Icons.water_drop_outlined},
-      {'id': 'PLN', 'label': isIndo ? 'PLN' : 'Electricity', 'icon': Icons.electric_bolt_outlined},
-      {'id': 'Pendidikan', 'label': isIndo ? 'Pendidikan' : 'Education', 'icon': Icons.school_outlined},
-      {'id': 'Internet', 'label': isIndo ? 'Internet' : 'Internet', 'icon': Icons.wifi},
+      {
+        'id': 'PDAM',
+        'label': isIndo ? 'PDAM' : 'Water',
+        'image': 'assets/images/PDAM.png',
+      },
+      {
+        'id': 'PLN',
+        'label': isIndo ? 'PLN' : 'Electricity',
+        'image': 'assets/images/PLN.png',
+      },
+      {
+        'id': 'Pendidikan',
+        'label': isIndo ? 'Pendi dikan' : 'Education',
+        'image': 'assets/images/Pendidikan.png',
+      },
+      {
+        'id': 'Internet',
+        'label': isIndo ? 'Internet' : 'Internet',
+        'image': 'assets/images/Wifi.png',
+      },
     ];
 
     final currencyLocale = isIndo ? 'id_ID' : 'en_US';
@@ -217,7 +241,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: Text(labels['logout']!, style: const TextStyle(color: Colors.red)),
+                    child: Text(
+                      labels['logout']!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ),
@@ -228,10 +255,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               try {
                 await auth.logout();
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(labels['logout_success']!), duration: const Duration(seconds: 2)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(labels['logout_success']!),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
               } catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(labels['logout_failed']!)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(labels['logout_failed']!)),
+                );
               }
             }
           },
@@ -252,7 +286,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.settings_outlined),
             tooltip: labels['settings_tooltip'],
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -279,11 +316,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             labels['header']!,
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            user != null ? '${labels['hello']}, ${user.email}' : '${labels['hello']}, user',
+                            user != null
+                                ? '${labels['hello']}, ${user.email}'
+                                : '${labels['hello']}, user',
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],
@@ -292,8 +333,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Container(
                       width: 68,
                       height: 68,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.home_outlined, size: 32, color: Colors.blueAccent),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.home_outlined,
+                        size: 32,
+                        color: Colors.blueAccent,
+                      ),
                     ),
                   ],
                 ),
@@ -302,26 +350,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(labels['categories_title']!, style: theme.textTheme.titleMedium),
+                  Text(
+                    labels['categories_title']!,
+                    style: theme.textTheme.titleMedium,
+                  ),
                   if (_selectedCategory != null)
                     TextButton(
                       onPressed: () => setState(() => _selectedCategory = null),
-                      child: Text(labels['reset']!, style: const TextStyle(color: Colors.red)),
+                      child: Text(
+                        labels['reset']!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     )
                   else
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillFormScreen())),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const BillFormScreen(),
+                        ),
+                      ),
                     ),
                 ],
               ),
               const SizedBox(height: 6),
               SizedBox(
-                height: 96,
+                height: 120,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  separatorBuilder: (_, __) => const SizedBox(width: 24),
                   itemBuilder: (context, i) {
                     final cat = categories[i];
                     final id = cat['id'] as String;
@@ -343,24 +403,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: 92,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.blueAccent : const Color(0xFFDFF7F7),
+                          color: isSelected
+                              ? Colors.blueAccent
+                              : const Color(0xFFDFF7F7),
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected ? Border.all(color: Colors.blue.shade800, width: 2) : null,
+                          border: isSelected
+                              ? Border.all(
+                                  color: Colors.blue.shade800,
+                                  width: 2,
+                                )
+                              : null,
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             CircleAvatar(
-                              radius: 22,
+                              radius: 35,
                               backgroundColor: Colors.white,
-                              child: Icon(cat['icon'] as IconData, color: isSelected ? Colors.blueAccent : Colors.blueAccent),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Image.asset(
+                                  cat['image'] as String,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.contain,
+                                  cacheWidth: 200,
+                                  filterQuality: FilterQuality.high,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: isSelected ? Colors.white : Colors.black87,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -376,7 +457,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedCategory == null ? labels['list_title']! : '${labels['payment']} ($_selectedCategory)',
+                    _selectedCategory == null
+                        ? labels['list_title']!
+                        : '${labels['payment']} ($_selectedCategory)',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -386,7 +469,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 data: (bills) {
                   var filteredBills = bills;
                   if (_selectedCategory != null) {
-                    filteredBills = bills.where((b) => b.category == _selectedCategory).toList();
+                    filteredBills = bills
+                        .where((b) => b.category == _selectedCategory)
+                        .toList();
                   }
 
                   if (filteredBills.isEmpty) {
@@ -395,11 +480,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Center(
                         child: Column(
                           children: [
-                            Icon(Icons.search_off, size: 48, color: Colors.grey[300]),
+                            Icon(
+                              Icons.search_off,
+                              size: 48,
+                              color: Colors.grey[300],
+                            ),
                             const SizedBox(height: 8),
                             Text(
-                              _selectedCategory == null ? labels['empty_list']! : '${labels['empty_filter']} $_selectedCategory',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                              _selectedCategory == null
+                                  ? labels['empty_list']!
+                                  : '${labels['empty_filter']} $_selectedCategory',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -415,19 +508,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          color: b.isPaid ? Colors.green[50] : const Color(0xFFF5F6FA),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          color: b.isPaid
+                              ? Colors.green[50]
+                              : const Color(0xFFF5F6FA),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             leading: Checkbox(
                               value: b.isPaid,
                               onChanged: (val) async {
                                 if (val != null) {
                                   try {
-                                    await billsController.toggleStatus(b.id, val);
+                                    await billsController.toggleStatus(
+                                      b.id,
+                                      val,
+                                    );
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: $e')));
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Update failed: $e'),
+                                        ),
+                                      );
                                     }
                                   }
                                 }
@@ -437,7 +546,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               b.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                decoration: b.isPaid ? TextDecoration.lineThrough : null,
+                                decoration: b.isPaid
+                                    ? TextDecoration.lineThrough
+                                    : null,
                                 color: b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
@@ -449,8 +560,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat.currency(locale: currencyLocale, symbol: currencySymbol, decimalDigits: 0).format(b.amount),
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
+                                  NumberFormat.currency(
+                                    locale: currencyLocale,
+                                    symbol: currencySymbol,
+                                    decimalDigits: 0,
+                                  ).format(b.amount),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.green,
+                                  ),
                                 ),
                               ],
                             ),
@@ -458,27 +577,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    size: 20,
+                                    color: Colors.blue,
+                                  ),
                                   onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => BillFormScreen(bill: b)));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BillFormScreen(bill: b),
+                                      ),
+                                    );
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
                                         title: const Text('Hapus?'),
-                                        content: Text('Yakin hapus ${b.title}?'),
+                                        content: Text(
+                                          'Yakin hapus ${b.title}?',
+                                        ),
                                         actions: [
-                                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(ctx),
+                                            child: const Text('Batal'),
+                                          ),
                                           TextButton(
                                             onPressed: () {
                                               billsController.deleteBill(b.id);
                                               Navigator.pop(ctx);
                                             },
-                                            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                                            child: const Text(
+                                              'Hapus',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -488,7 +630,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ],
                             ),
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => BillDetailScreen(bill: b)));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BillDetailScreen(bill: b),
+                                ),
+                              );
                             },
                           ),
                         ),
@@ -496,8 +643,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     }).toList(),
                   );
                 },
-                loading: () => const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator())),
-                error: (e, st) => Padding(padding: const EdgeInsets.all(12.0), child: Text('Error: $e')),
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (e, st) => Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text('Error: $e'),
+                ),
               ),
               const SizedBox(height: 80),
             ],
