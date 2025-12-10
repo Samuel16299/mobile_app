@@ -13,15 +13,14 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+
+  google_fonts: ^6.1.0
   cupertino_icons: ^1.0.8
 
   # Firebase
   firebase_core: ^4.2.1
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
-
-  google_sign_in: ^6.2.1
-  google_sign_in_dartio: ^0.2.0
 
   # State management & utils
   flutter_riverpod: ^2.6.1
