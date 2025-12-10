@@ -20,6 +20,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _selectedCategory;
   bool _isTotalVisible = true;
 
+  final Color _primaryBlue = const Color(0xFF0073E6);
+  final Color _primaryBlueLight = const Color(0xFF4A90E2);
+  final Color _bannerMint = const Color(0xFFE6FBFB);
+  final Color _softBackground = const Color(0xFFF3F4F6);
+  final Color _cardBg = const Color(0xFFF5F6FA);
+  final Color _categorySelected = Colors.blueAccent;
+  final Color _paidGreen = const Color(0xFF16A34A);
+  final Color _paidGreenBg = const Color(0xFFECFDF3);
+
   Widget _buildTotalBalanceCard(
       AsyncValue<List<Bill>> billsAsync,
       NumberFormat formatter,
@@ -41,15 +50,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4A90E2), Color(0xFF0073E6)],
+        gradient: LinearGradient(
+          colors: [_primaryBlueLight, _primaryBlue],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: _primaryBlue.withOpacity(0.25),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -69,6 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              // (Hide/Show)
               InkWell(
                 onTap: () {
                   setState(() {
@@ -90,8 +100,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
           const SizedBox(height: 8),
+          // Teks Nominal
           Text(
-            _isTotalVisible ? formatter.format(totalAmount) : 'Rp * * * * * * *',
+            _isTotalVisible
+                ? formatter.format(totalAmount)
+                : 'Rp * * * * * * *',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -100,6 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -140,9 +154,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return Container(
           padding: const EdgeInsets.all(20),
           height: 500,
+          decoration: BoxDecoration(
+            color: _softBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Center(
                 child: Container(
                   width: 40,
@@ -154,6 +173,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
+
               const Text(
                 'Total Tagihan Aktif',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
@@ -185,7 +205,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
+
               const Text(
                 'Riwayat Lunas',
                 style: TextStyle(
@@ -195,6 +217,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+
               Expanded(
                 child: paidBills.isEmpty
                     ? Center(
@@ -262,13 +285,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       'reset': isIndo ? 'Hapus Filter' : 'Reset Filter',
       'list_title': isIndo ? 'Daftar Pembayaran' : 'Payment List',
       'payment': isIndo ? 'Pembayaran' : 'Payment',
-      'empty_list': isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
+      'empty_list':
+      isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
       'empty_filter': isIndo ? 'Tidak ada tagihan' : 'No bills for',
       'due_date': isIndo ? 'Jatuh tempo' : 'Due date',
       'logout_tooltip': isIndo ? 'Keluar' : 'Logout',
       'settings_tooltip': isIndo ? 'Pengaturan' : 'Settings',
       'confirm_title': isIndo ? 'Konfirmasi' : 'Confirm',
-      'confirm_logout': isIndo ? 'Yakin ingin keluar dari aplikasi?' : 'Are you sure you want to log out?',
+      'confirm_logout': isIndo
+          ? 'Yakin ingin keluar dari aplikasi?'
+          : 'Are you sure you want to log out?',
       'cancel': isIndo ? 'Batal' : 'Cancel',
       'logout': isIndo ? 'Keluar' : 'Logout',
       'logout_success': isIndo ? 'Berhasil keluar' : 'Logged out',
@@ -308,10 +334,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _softBackground,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: _cardBg,
+        foregroundColor: Colors.black87,
         leading: IconButton(
           icon: const Icon(Icons.logout),
           tooltip: labels['logout_tooltip'],
@@ -386,12 +413,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
-              // Banner sapaan
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE6FBFB),
-                  borderRadius: BorderRadius.circular(12),
+                  color: _primaryBlue,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _primaryBlue.withOpacity(0.20),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -402,13 +435,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Text(
                             labels['header']!,
                             style: theme.textTheme.headlineSmall?.copyWith(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            user != null ? '${labels['hello']}, ${user.email}' : '${labels['hello']}, user',
-                            style: theme.textTheme.bodyMedium,
+                            user != null
+                                ? '${labels['hello']}, ${user.email}'
+                                : '${labels['hello']}, user',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white70,
+                            ),
                           ),
                         ],
                       ),
@@ -438,7 +476,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     )
                   else
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
+                      icon: Icon(Icons.add_circle_outline, color: _primaryBlue),
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -477,7 +515,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: 92,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.blueAccent : const Color(0xFFDFF7F7),
+                          color: isSelected ? _categorySelected : _cardBg,
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected
                               ? Border.all(
@@ -508,8 +546,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Text(
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: isSelected ? Colors.white : Colors.black87,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color:
+                                isSelected ? Colors.white : Colors.black87,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -525,7 +566,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedCategory == null ? labels['list_title']! : '${labels['payment']} ($_selectedCategory)',
+                    _selectedCategory == null
+                        ? labels['list_title']!
+                        : '${labels['payment']} ($_selectedCategory)',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -535,7 +578,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 data: (bills) {
                   var filteredBills = bills;
                   if (_selectedCategory != null) {
-                    filteredBills = bills.where((b) => b.category == _selectedCategory).toList();
+                    filteredBills = bills
+                        .where((b) => b.category == _selectedCategory)
+                        .toList();
                   }
 
                   if (filteredBills.isEmpty) {
@@ -551,8 +596,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _selectedCategory == null ? labels['empty_list']! : '${labels['empty_filter']} $_selectedCategory',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                              _selectedCategory == null
+                                  ? labels['empty_list']!
+                                  : '${labels['empty_filter']} $_selectedCategory',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.grey,
+                              ),
                             ),
                           ],
                         ),
@@ -568,22 +617,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          color: b.isPaid ? Colors.green[50] : const Color(0xFFF5F6FA),
+                          color: b.isPaid ? _paidGreenBg : const Color(0xFFF5F6FA),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             leading: Checkbox(
                               value: b.isPaid,
                               onChanged: (val) async {
                                 if (val != null) {
                                   try {
-                                    await billsController.toggleStatus(b.id, val);
+                                    await billsController.toggleStatus(
+                                      b.id,
+                                      val,
+                                    );
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Update failed: $e')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Update failed: $e'),
+                                        ),
                                       );
                                     }
                                   }
@@ -594,8 +653,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               b.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                decoration: b.isPaid ? TextDecoration.lineThrough : null,
-                                color: b.isPaid ? Colors.grey : Colors.black,
+                                decoration: b.isPaid
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color:
+                                b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
                             subtitle: Column(
@@ -606,8 +668,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat.currency(locale: currencyLocale, symbol: currencySymbol, decimalDigits: 0).format(b.amount),
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
+                                  NumberFormat.currency(
+                                    locale: currencyLocale,
+                                    symbol: currencySymbol,
+                                    decimalDigits: 0,
+                                  ).format(b.amount),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.green,
+                                  ),
                                 ),
                               ],
                             ),
@@ -615,27 +685,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
+                                  icon: Icon(
+                                    Icons.edit,
+                                    size: 20,
+                                    color: _primaryBlue,
+                                  ),
                                   onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => BillFormScreen(bill: b)));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            BillFormScreen(bill: b),
+                                      ),
+                                    );
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
                                         title: const Text('Hapus?'),
-                                        content: Text('Yakin hapus ${b.title}?'),
+                                        content: Text(
+                                          'Yakin hapus ${b.title}?',
+                                        ),
                                         actions: [
-                                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx),
+                                            child: const Text('Batal'),
+                                          ),
                                           TextButton(
                                             onPressed: () {
                                               billsController.deleteBill(b.id);
                                               Navigator.pop(ctx);
                                             },
-                                            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                                            child: const Text(
+                                              'Hapus',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -645,7 +740,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ],
                             ),
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => BillDetailScreen(bill: b)));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      BillDetailScreen(bill: b),
+                                ),
+                              );
                             },
                           ),
                         ),
