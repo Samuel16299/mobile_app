@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/bills_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../models/bill_model.dart'; // Pastikan import ini ada
+import '../../models/bill_model.dart';
 import 'bill_detail_screen.dart';
 import 'bill_form_screen.dart';
 import '../../../settings/providers/locale_provider.dart';
@@ -18,6 +18,111 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _selectedCategory;
+  bool _isTotalVisible = true;
+
+  Widget _buildTotalBalanceCard(
+    AsyncValue<List<Bill>> billsAsync,
+    NumberFormat formatter,
+  ) {
+    // Menghitung total tagihan yang belum dibayar
+    final double totalAmount = billsAsync.maybeWhen(
+      data: (bills) => bills
+          .where((b) => !b.isPaid) // Ambil yang belum lunas
+          .fold(0.0, (sum, item) => sum + item.amount), // Jumlahkan
+      orElse: () => 0.0,
+    );
+
+    // Menghitung jumlah item yang belum lunas
+    final int unpaidCount = billsAsync.maybeWhen(
+      data: (bills) => bills.where((b) => !b.isPaid).length,
+      orElse: () => 0,
+    );
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 24), // Jarak ke bawah (ke kategori)
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        // Desain Gradasi Biru agar terlihat modern
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4A90E2), Color(0xFF0073E6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total Tagihan Anda',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              // Tombol Mata (Hide/Show)
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isTotalVisible = !_isTotalVisible;
+                  });
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    _isTotalVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Teks Nominal Uang
+          Text(
+            _isTotalVisible
+                ? formatter.format(totalAmount)
+                : 'Rp * * * * * * *', // Sensor jika disembunyikan
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Info tambahan kecil di bawah
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '$unpaidCount tagihan belum lunas',
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   // --- FUNGSI BARU: MENAMPILKAN POPUP RINGKASAN ---
   void _showSummaryPopup(BuildContext context, List<Bill> allBills) {
@@ -219,6 +324,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currencyLocale = isIndo ? 'id_ID' : 'en_US';
     final dateLocale = isIndo ? 'id_ID' : 'en_US';
     final currencySymbol = isIndo ? 'Rp' : 'Rp';
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -347,6 +457,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 14),
+
+              _buildTotalBalanceCard(billsAsync, currencyFormatter),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
