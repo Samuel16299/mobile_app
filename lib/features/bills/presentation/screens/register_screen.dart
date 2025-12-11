@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -31,10 +32,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
 
       Navigator.pop(context);
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'email-already-in-use') {
+        message = 'Email sudah terdaftar. Silakan gunakan email lain.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Email tidak valid.';
+      } else if (e.code == 'weak-password') {
+        message = 'Password terlalu lemah.';
+      } else {
+        message = e.message ?? 'Terjadi kesalahan.';
+      }
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      String msg = e.toString();
+      if (msg.toLowerCase().contains('email') && msg.toLowerCase().contains('already')) {
+        msg = 'Email sudah terdaftar.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg)),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -50,11 +73,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       fontWeight: FontWeight.w800,
       fontSize: 28,
       shadows: const [
-        Shadow(
-          color: Colors.black45,
-          offset: Offset(0, 2),
-          blurRadius: 6,
-        ),
+        Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 6),
       ],
     );
 
@@ -63,11 +82,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       fontWeight: FontWeight.w700,
       fontSize: 14,
       shadows: const [
-        Shadow(
-          color: Colors.black38,
-          offset: Offset(0, 1),
-          blurRadius: 4,
-        ),
+        Shadow(color: Colors.black38, offset: Offset(0, 1), blurRadius: 4),
       ],
     );
 
@@ -85,26 +100,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/bg_login.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/bg_login.jpg', fit: BoxFit.cover),
           ),
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.18),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.18)),
           ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
-
                     Text('Daftar Akun', style: titleStyle),
                     const SizedBox(height: 6),
                     Text(
@@ -112,9 +120,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       textAlign: TextAlign.center,
                       style: subtitleStyle,
                     ),
-
                     const SizedBox(height: 18),
-
                     Container(
                       width: double.infinity,
                       constraints: const BoxConstraints(maxWidth: 520),
@@ -129,8 +135,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 18),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -149,24 +154,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                               onChanged: (v) => _email = v,
-                              validator: (v) => v != null && v.contains('@')
-                                  ? null
-                                  : 'Email tidak valid',
+                              validator: (v) =>
+                              v != null && v.contains('@') ? null : 'Email tidak valid',
                             ),
-
                             const SizedBox(height: 12),
-
                             TextFormField(
                               obscureText: _obscure,
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 prefixIcon: const Icon(Icons.lock_outline),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_obscure
-                                      ? Icons.visibility
-                                      : Icons.visibility_off),
-                                  onPressed: () =>
-                                      setState(() => _obscure = !_obscure),
+                                  icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+                                  onPressed: () => setState(() => _obscure = !_obscure),
                                 ),
                                 filled: true,
                                 fillColor: Colors.grey.shade100,
@@ -177,16 +176,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                               onChanged: (v) => _password = v,
-                              validator: (v) => v != null && v.length >= 6
-                                  ? null
-                                  : 'Minimal 6 karakter',
+                              validator: (v) =>
+                              v != null && v.length >= 6 ? null : 'Minimal 6 karakter',
                             ),
-
                             const SizedBox(height: 18),
-
-                            // =======================
-                            //      TOMBOL DAFTAR
-                            // =======================
                             SizedBox(
                               width: double.infinity,
                               height: 48,
@@ -220,20 +213,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         strokeWidth: 2,
                                       ),
                                     )
-                                        : Text(
-                                      'Daftar Sekarang',
-                                      style: buttonTextStyle,
-                                    ),
+                                        : Text('Daftar Sekarang', style: buttonTextStyle),
                                   ),
                                 ),
                               ),
                             ),
-
                             const SizedBox(height: 14),
-
-                            // =======================
-                            //       TOMBOL KEMBALI
-                            // =======================
                             SizedBox(
                               width: double.infinity,
                               height: 46,
@@ -255,12 +240,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                             ),
-
                           ],
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 18),
                   ],
                 ),
