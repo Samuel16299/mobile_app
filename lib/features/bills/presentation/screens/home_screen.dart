@@ -6,7 +6,6 @@ import '../../providers/auth_provider.dart';
 import '../../models/bill_model.dart';
 import 'bill_detail_screen.dart';
 import 'bill_form_screen.dart';
-import '../../../settings/providers/locale_provider.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -22,17 +21,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   final Color _primaryBlue = const Color(0xFF0073E6);
   final Color _primaryBlueLight = const Color(0xFF4A90E2);
-  final Color _bannerMint = const Color(0xFFE6FBFB);
   final Color _softBackground = const Color(0xFFF3F4F6);
   final Color _cardBg = const Color(0xFFF5F6FA);
   final Color _categorySelected = Colors.blueAccent;
-  final Color _paidGreen = const Color(0xFF16A34A);
   final Color _paidGreenBg = const Color(0xFFECFDF3);
 
+  // Widget Kartu Saldo
   Widget _buildTotalBalanceCard(
-      AsyncValue<List<Bill>> billsAsync,
-      NumberFormat formatter,
-      ) {
+    AsyncValue<List<Bill>> billsAsync,
+    NumberFormat formatter,
+  ) {
     final double totalAmount = billsAsync.maybeWhen(
       data: (bills) => bills
           .where((b) => !b.isPaid)
@@ -78,7 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              // (Hide/Show)
+              // Tombol Sembunyikan/Tampilkan
               InkWell(
                 onTap: () {
                   setState(() {
@@ -130,6 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // Pop-up Ringkasan
   void _showSummaryPopup(BuildContext context, List<Bill> allBills) {
     final unpaidBills = allBills.where((b) => !b.isPaid).toList();
     final paidBills = allBills.where((b) => b.isPaid).toList();
@@ -161,7 +160,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Center(
                 child: Container(
                   width: 40,
@@ -173,7 +171,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-
               const Text(
                 'Total Tagihan Aktif',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
@@ -205,9 +202,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
               const Text(
                 'Riwayat Lunas',
                 style: TextStyle(
@@ -217,48 +212,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-
               Expanded(
                 child: paidBills.isEmpty
                     ? Center(
-                  child: Text(
-                    'Belum ada tagihan lunas',
-                    style: TextStyle(color: Colors.grey[400]),
-                  ),
-                )
+                        child: Text(
+                          'Belum ada tagihan lunas',
+                          style: TextStyle(color: Colors.grey[400]),
+                        ),
+                      )
                     : ListView.separated(
-                  itemCount: paidBills.length,
-                  separatorBuilder: (_, __) => const Divider(),
-                  itemBuilder: (context, index) {
-                    final bill = paidBills[index];
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const CircleAvatar(
-                        backgroundColor: Colors.green,
-                        radius: 16,
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 16,
-                        ),
+                        itemCount: paidBills.length,
+                        separatorBuilder: (_, __) => const Divider(),
+                        itemBuilder: (context, index) {
+                          final bill = paidBills[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const CircleAvatar(
+                              backgroundColor: Colors.green,
+                              radius: 16,
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                            title: Text(
+                              bill.title,
+                              style: const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: Text(
+                              currencyFormatter.format(bill.amount),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      title: Text(
-                        bill.title,
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      trailing: Text(
-                        currencyFormatter.format(bill.amount),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
@@ -275,58 +269,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final billsAsync = ref.watch(billsStreamProvider);
     final billsController = ref.watch(billsControllerProvider);
 
-    final currentLocale = ref.watch(localeProvider);
-    final isIndo = currentLocale.languageCode == 'id';
-
-    final labels = {
-      'header': isIndo ? 'Jangan lupa bayar!' : "Don't forget to pay!",
-      'hello': isIndo ? 'Halo' : 'Hello',
-      'categories_title': isIndo ? 'Daftar catatan' : 'Categories',
-      'reset': isIndo ? 'Hapus Filter' : 'Reset Filter',
-      'list_title': isIndo ? 'Daftar Pembayaran' : 'Payment List',
-      'payment': isIndo ? 'Pembayaran' : 'Payment',
-      'empty_list':
-      isIndo ? 'Belum ada catatan pembayaran' : 'No payment records yet',
-      'empty_filter': isIndo ? 'Tidak ada tagihan' : 'No bills for',
-      'due_date': isIndo ? 'Jatuh tempo' : 'Due date',
-      'logout_tooltip': isIndo ? 'Keluar' : 'Logout',
-      'settings_tooltip': isIndo ? 'Pengaturan' : 'Settings',
-      'confirm_title': isIndo ? 'Konfirmasi' : 'Confirm',
-      'confirm_logout': isIndo
-          ? 'Yakin ingin keluar dari aplikasi?'
-          : 'Are you sure you want to log out?',
-      'cancel': isIndo ? 'Batal' : 'Cancel',
-      'logout': isIndo ? 'Keluar' : 'Logout',
-      'logout_success': isIndo ? 'Berhasil keluar' : 'Logged out',
-      'logout_failed': isIndo ? 'Gagal keluar' : 'Failed to logout',
-    };
-
+    // Data Kategori Statis (Bahasa Indonesia)
     final categories = [
       {
         'id': 'PDAM',
-        'label': isIndo ? 'PDAM' : 'Water',
+        'label': 'PDAM',
         'image': 'assets/images/PDAM.png',
       },
       {
         'id': 'PLN',
-        'label': isIndo ? 'PLN' : 'Electricity',
+        'label': 'PLN',
         'image': 'assets/images/PLN.png',
       },
       {
         'id': 'Pendidikan',
-        'label': isIndo ? 'Pendidikan' : 'Education',
+        'label': 'Pendidikan',
         'image': 'assets/images/Pendidikan.png',
       },
       {
         'id': 'Internet',
-        'label': isIndo ? 'Internet' : 'Internet',
+        'label': 'Internet',
         'image': 'assets/images/Wifi.png',
       },
     ];
 
-    final currencyLocale = isIndo ? 'id_ID' : 'en_US';
-    final dateLocale = isIndo ? 'id_ID' : 'en_US';
-    final currencySymbol = isIndo ? 'Rp' : 'Rp';
+    // Formatter Rupiah
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
@@ -341,23 +308,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         foregroundColor: Colors.black87,
         leading: IconButton(
           icon: const Icon(Icons.logout),
-          tooltip: labels['logout_tooltip'],
+          tooltip: 'Keluar',
           onPressed: () async {
             final shouldLogout = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: Text(labels['confirm_title']!),
-                content: Text(labels['confirm_logout']!),
+                title: const Text('Konfirmasi'),
+                content: const Text('Yakin ingin keluar dari aplikasi?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
-                    child: Text(labels['cancel']!),
+                    child: const Text('Batal'),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
-                    child: Text(
-                      labels['logout']!,
-                      style: const TextStyle(color: Colors.red),
+                    child: const Text(
+                      'Keluar',
+                      style: TextStyle(color: Colors.red),
                     ),
                   ),
                 ],
@@ -370,15 +337,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 await auth.logout();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(labels['logout_success']!),
-                    duration: const Duration(seconds: 2),
+                  const SnackBar(
+                    content: Text('Berhasil keluar'),
+                    duration: Duration(seconds: 2),
                   ),
                 );
               } catch (e) {
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(labels['logout_failed']!)),
+                  const SnackBar(content: Text('Gagal keluar')),
                 );
               }
             }
@@ -395,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: labels['settings_tooltip'],
+            tooltip: 'Pengaturan',
             onPressed: () {
               Navigator.push(
                 context,
@@ -433,7 +400,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            labels['header']!,
+                            'Jangan lupa bayar!',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -442,8 +409,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           const SizedBox(height: 6),
                           Text(
                             user != null
-                                ? '${labels['hello']}, ${user.email}'
-                                : '${labels['hello']}, user',
+                                ? 'Halo, ${user.email}'
+                                : 'Halo, user',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white70,
                             ),
@@ -463,15 +430,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    labels['categories_title']!,
+                    'Daftar catatan',
                     style: theme.textTheme.titleMedium,
                   ),
                   if (_selectedCategory != null)
                     TextButton(
                       onPressed: () => setState(() => _selectedCategory = null),
-                      child: Text(
-                        labels['reset']!,
-                        style: const TextStyle(color: Colors.red),
+                      child: const Text(
+                        'Hapus Filter',
+                        style: TextStyle(color: Colors.red),
                       ),
                     )
                   else
@@ -519,9 +486,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected
                               ? Border.all(
-                            color: Colors.blue.shade800,
-                            width: 2,
-                          )
+                                  color: Colors.blue.shade800,
+                                  width: 2,
+                                )
                               : null,
                         ),
                         child: Column(
@@ -537,7 +504,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.contain,
-                                  cacheWidth: 200,
                                   filterQuality: FilterQuality.high,
                                 ),
                               ),
@@ -547,7 +513,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color:
-                                isSelected ? Colors.white : Colors.black87,
+                                    isSelected ? Colors.white : Colors.black87,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
                                     : FontWeight.normal,
@@ -567,8 +533,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Text(
                     _selectedCategory == null
-                        ? labels['list_title']!
-                        : '${labels['payment']} ($_selectedCategory)',
+                        ? 'Daftar Pembayaran'
+                        : 'Pembayaran ($_selectedCategory)',
                     style: theme.textTheme.titleMedium,
                   ),
                 ],
@@ -597,8 +563,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             const SizedBox(height: 8),
                             Text(
                               _selectedCategory == null
-                                  ? labels['empty_list']!
-                                  : '${labels['empty_filter']} $_selectedCategory',
+                                  ? 'Belum ada catatan pembayaran'
+                                  : 'Tidak ada tagihan $_selectedCategory',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: Colors.grey,
                               ),
@@ -641,7 +607,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text('Update failed: $e'),
+                                          content: Text('Gagal update: $e'),
                                         ),
                                       );
                                     }
@@ -657,22 +623,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ? TextDecoration.lineThrough
                                     : null,
                                 color:
-                                b.isPaid ? Colors.grey : Colors.black,
+                                    b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${labels['due_date']}: ${DateFormat.yMMMd(dateLocale).format(b.dueDate)}',
+                                  'Jatuh tempo: ${DateFormat.yMMMd('id_ID').format(b.dueDate)}',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                                 Text(
-                                  NumberFormat.currency(
-                                    locale: currencyLocale,
-                                    symbol: currencySymbol,
-                                    decimalDigits: 0,
-                                  ).format(b.amount),
+                                  currencyFormatter.format(b.amount),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,

@@ -8,7 +8,7 @@ class NotificationService {
 
   // Inisialisasi plugin
   Future<void> init() async {
-    tz.initializeTimeZones(); // Inisialisasi timezone data
+    tz.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings(
@@ -35,7 +35,6 @@ class NotificationService {
     }
   }
 
-  // Jadwalkan Notifikasi
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -63,7 +62,6 @@ class NotificationService {
         notificationDetails,
       );
     } else {
-      // KONDISI B: Jika waktu belum lewat -> JADWALKAN sesuai tanggal
       await _plugin.zonedSchedule(
         id,
         title,
@@ -96,7 +94,7 @@ class NotificationService {
     await _plugin.show(
       888, // ID unik sembarang untuk test
       'Test Notifikasi', 
-      'Sistem notifikasi aplikasi berfungsi dengan baik! 🔔', 
+      'Sistem notifikasi aplikasi berfungsi dengan baik!', 
       details,
     );
   }

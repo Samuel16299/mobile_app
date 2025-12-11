@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'features/settings/providers/locale_provider.dart';
 import 'features/bills/providers/auth_provider.dart';
 import 'features/bills/presentation/screens/login_screen.dart';
 import 'features/bills/presentation/screens/home_screen.dart';
@@ -24,12 +23,11 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authAsync = ref.watch(authStateProvider);
-    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
       title: 'Bills App',
       debugShowCheckedModeBanner: false,
-      locale: locale,
+      locale: const Locale('id', 'ID'),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -42,7 +40,6 @@ class MyApp extends ConsumerWidget {
       ],
       supportedLocales: const [
         Locale('id', 'ID'),
-        Locale('en', 'US'),
       ],
       home: authAsync.when(
         data: (user) {
