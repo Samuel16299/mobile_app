@@ -25,6 +25,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final Color _cardBg = const Color(0xFFF5F6FA);
   final Color _categorySelected = Colors.blueAccent;
   final Color _paidGreenBg = const Color(0xFFECFDF3);
+  final Color _unselectedCategoryColor = const Color.fromARGB(
+    255,
+    176,
+    222,
+    255,
+  );
 
   // Widget Kartu Saldo
   Widget _buildTotalBalanceCard(
@@ -530,7 +536,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         width: 92,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected ? _categorySelected : _cardBg,
+                          color: isSelected
+                              ? _categorySelected
+                              : _unselectedCategoryColor,
                           borderRadius: BorderRadius.circular(12),
                           border: isSelected
                               ? Border.all(
