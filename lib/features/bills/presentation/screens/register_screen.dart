@@ -23,15 +23,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       final auth = ref.read(authServiceProvider);
       await auth.registerWithEmail(_email.trim(), _password.trim());
-      
+
       if (!mounted) return;
 
-      // Tampilkan notifikasi sukses
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registrasi berhasil')),
       );
-      
-      // Kembali ke layar login
+
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
@@ -45,8 +43,43 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Mengambil tema global dari main.dart (sudah Montserrat)
     final theme = Theme.of(context);
+
+    final titleStyle = theme.textTheme.headlineSmall?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+      fontSize: 28,
+      shadows: const [
+        Shadow(
+          color: Colors.black45,
+          offset: Offset(0, 2),
+          blurRadius: 6,
+        ),
+      ],
+    );
+
+    final subtitleStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: Colors.white70,
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      shadows: const [
+        Shadow(
+          color: Colors.black38,
+          offset: Offset(0, 1),
+          blurRadius: 4,
+        ),
+      ],
+    );
+
+    final cardLabelStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: Colors.grey.shade800,
+      fontWeight: FontWeight.w700,
+    );
+
+    final buttonTextStyle = theme.textTheme.labelLarge?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+    );
 
     return Scaffold(
       body: Stack(
@@ -65,28 +98,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Daftar Akun',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    const SizedBox(height: 8),
+
+                    Text('Daftar Akun', style: titleStyle),
                     const SizedBox(height: 6),
                     Text(
                       'Buat akun untuk mulai mengelola tagihan',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500,
-                      ),
                       textAlign: TextAlign.center,
+                      style: subtitleStyle,
                     ),
+
                     const SizedBox(height: 18),
+
                     Container(
                       width: double.infinity,
                       constraints: const BoxConstraints(maxWidth: 520),
@@ -102,9 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ],
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 18,
-                      ),
+                          horizontal: 18, vertical: 18),
                       child: Form(
                         key: _formKey,
                         child: Column(
@@ -116,18 +142,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 prefixIcon: const Icon(Icons.email_outlined),
                                 filled: true,
                                 fillColor: Colors.grey.shade100,
+                                labelStyle: cardLabelStyle,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
                               ),
                               onChanged: (v) => _email = v,
-                              validator: (v) =>
-                                  v != null && v.contains('@')
-                                      ? null
-                                      : 'Email tidak valid',
+                              validator: (v) => v != null && v.contains('@')
+                                  ? null
+                                  : 'Email tidak valid',
                             ),
+
                             const SizedBox(height: 12),
+
                             TextFormField(
                               obscureText: _obscure,
                               decoration: InputDecoration(
@@ -137,23 +165,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   icon: Icon(_obscure
                                       ? Icons.visibility
                                       : Icons.visibility_off),
-                                  onPressed: () => setState(
-                                      () => _obscure = !_obscure),
+                                  onPressed: () =>
+                                      setState(() => _obscure = !_obscure),
                                 ),
                                 filled: true,
                                 fillColor: Colors.grey.shade100,
+                                labelStyle: cardLabelStyle,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
                                 ),
                               ),
                               onChanged: (v) => _password = v,
-                              validator: (v) =>
-                                  v != null && v.length >= 6
-                                      ? null
-                                      : 'Minimal 6 karakter',
+                              validator: (v) => v != null && v.length >= 6
+                                  ? null
+                                  : 'Minimal 6 karakter',
                             ),
+
                             const SizedBox(height: 18),
+
+                            // =======================
+                            //      TOMBOL DAFTAR
+                            // =======================
                             SizedBox(
                               width: double.infinity,
                               height: 48,
@@ -171,8 +204,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        Colors.blue.shade600,
-                                        Colors.blue.shade400,
+                                        Colors.blue.shade700,
+                                        Colors.blue.shade500,
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(12),
@@ -180,28 +213,54 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   child: Center(
                                     child: _loading
                                         ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
-                                          )
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
                                         : Text(
-                                            'Daftar Sekarang',
-                                            style: theme.textTheme.labelLarge?.copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                      'Daftar Sekarang',
+                                      style: buttonTextStyle,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
+
+                            const SizedBox(height: 14),
+
+                            // =======================
+                            //       TOMBOL KEMBALI
+                            // =======================
+                            SizedBox(
+                              width: double.infinity,
+                              height: 46,
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  side: BorderSide(color: Colors.blue.shade200),
+                                  backgroundColor: Colors.blue.shade50,
+                                ),
+                                child: Text(
+                                  'Kembali',
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 18),
                   ],
                 ),
