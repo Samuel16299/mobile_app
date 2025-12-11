@@ -38,6 +38,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Mengambil tema global yang sudah menggunakan Montserrat
     final theme = Theme.of(context);
 
+    // Text styles khusus untuk layar ini supaya kontras lebih baik
+    final titleStyle = theme.textTheme.headlineSmall?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+      fontSize: 28,
+      shadows: const [
+        Shadow(
+          color: Colors.black45,
+          offset: Offset(0, 2),
+          blurRadius: 6,
+        ),
+      ],
+    );
+
+    final subtitleStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: Colors.white70,
+      fontWeight: FontWeight.w700,
+      fontSize: 14,
+      shadows: const [
+        Shadow(
+          color: Colors.black38,
+          offset: Offset(0, 1),
+          blurRadius: 4,
+        ),
+      ],
+    );
+
+    final cardLabelStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: Colors.grey.shade800,
+      fontWeight: FontWeight.w700,
+    );
+
+    final buttonTextStyle = theme.textTheme.labelLarge?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+    );
+
+    final outlinedButtonTextStyle = theme.textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w800,
+      color: Colors.black87,
+    );
+
     return Scaffold(
       body: Stack(
         children: [
@@ -62,10 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Halo, Selamat datang!',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: titleStyle,
                     ),
                     const SizedBox(height: 18),
                     Container(
@@ -97,8 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 prefixIcon: const Icon(Icons.email_outlined),
                                 filled: true,
                                 fillColor: Colors.grey.shade100,
-                                labelStyle: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
+                                labelStyle: cardLabelStyle,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
@@ -131,8 +169,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 filled: true,
                                 fillColor: Colors.grey.shade100,
-                                labelStyle: theme.textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w600),
+                                labelStyle: cardLabelStyle,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,
@@ -161,8 +198,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        Colors.blue.shade600,
-                                        Colors.blue.shade400,
+                                        Colors.blue.shade700,
+                                        Colors.blue.shade500,
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(12),
@@ -170,20 +207,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   child: Center(
                                     child: _loading
                                         ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
-                                          )
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
                                         : Text(
-                                            'Masuk',
-                                            style: theme.textTheme.labelLarge
-                                                ?.copyWith(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold),
-                                          ),
+                                      'Masuk',
+                                      style: buttonTextStyle,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -206,31 +240,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 child: Text(
                                   'Daftar',
-                                  style: theme.textTheme.labelLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: outlinedButtonTextStyle,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('Fitur belum tersedia')),
-                                  );
-                                },
-                                child: Text(
-                                  'Lupa kata sandi?',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // "Lupa kata sandi?" telah dihapus sesuai permintaan
                           ],
                         ),
                       ),
@@ -238,9 +253,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 18),
                     Text(
                       'Masuk untuk mengelola tagihanmu',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        shadows: const [
+                          Shadow(
+                            color: Colors.black54,
+                            offset: Offset(0, 2),
+                            blurRadius: 6,
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
