@@ -35,6 +35,7 @@ class NotificationService {
     }
   }
 
+  // --- 1. JADWALKAN TAGIHAN SPESIFIK ---
   Future<void> scheduleNotification({
     required int id,
     required String title,
@@ -57,10 +58,10 @@ class NotificationService {
     if (scheduledDate.isBefore(DateTime.now())) {
       await _plugin.show(
         id,
-        title,
-        body,
+        'Jatuh Tempo: $title',
+        'Tagihan ini sudah jatuh tempo pada ${date.day}/${date.month}. Segera bayar',
         notificationDetails,
-      );
+      ); 
     } else {
       await _plugin.zonedSchedule(
         id,
@@ -75,9 +76,49 @@ class NotificationService {
     }
   }
 
-  // Batalkan Notifikasi
+  Future<void> scheduleDailyNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'daily_channel',
+      'Pengingat Harian',
+      channelDescription: 'Pengingat Harian',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
+    await _plugin.zonedSchedule(
+      999,
+      'Cek Tagihan Anda',
+      'Jangan lupa cek aplikasi untuk tagihan yang belum lunas.',
+      _nextInstanceOfNineAM(),
+      notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  tz.TZDateTime _nextInstanceOfNineAM() {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate =
+        tz.TZDateTime(tz.local, now.year, now.month, now.day, 23);
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+    return scheduledDate;
+  }
+
   Future<void> cancelNotification(int id) async {
     await _plugin.cancel(id);
+  }
+
+  Future<void> cancelAllNotifications() async {
+    await _plugin.cancelAll();
   }
 
   Future<void> showInstantNotification() async {
@@ -92,7 +133,7 @@ class NotificationService {
     const details = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
 
     await _plugin.show(
-      888, // ID unik sembarang untuk test
+      888, 
       'Test Notifikasi', 
       'Sistem notifikasi aplikasi berfungsi dengan baik!', 
       details,

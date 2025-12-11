@@ -40,6 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+// Simpan status switch & atur notifikasi
   Future<void> _toggleDailyReminder(bool value) async {
     setState(() {
       _isDailyReminderEnabled = value;
@@ -52,28 +53,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final notifService = ref.read(notificationServiceProvider);
 
       if (value) {
+        // Aktifkan
         await notifService.requestPermissions();
+        await notifService.scheduleDailyNotification();
         
         if (mounted) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Berhasil)'),
+              content: Text('Pengingat harian aktif (09:00)'),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
             ),
           );
         }
-        
       } else {
+        await notifService.cancelNotification(999);
         
         if (mounted) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Pengingat dimatikan'),
-              duration: Duration(seconds: 2),
-            ),
+            const SnackBar(content: Text('Pengingat harian dimatikan')),
           );
         }
       }
@@ -81,7 +80,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (mounted) {
         setState(() => _isDailyReminderEnabled = !value);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: $e')),
+          SnackBar(content: Text('Gagal: $e')),
         );
       }
     }
