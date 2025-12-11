@@ -1,87 +1,173 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../bills/providers/bills_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _isDailyReminderEnabled = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSettings();
+    });
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      if (!mounted) return;
+
+      setState(() {
+        _isDailyReminderEnabled = prefs.getBool('daily_reminder') ?? false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error loading settings: $e");
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _toggleDailyReminder(bool value) async {
+    setState(() {
+      _isDailyReminderEnabled = value;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('daily_reminder', value);
+
+      final notifService = ref.read(notificationServiceProvider);
+
+      if (value) {
+        await notifService.requestPermissions();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Berhasil)'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        
+      } else {
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pengingat dimatikan'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isDailyReminderEnabled = !value);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menyimpan: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pengaturan'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Section Title
-          Text(
-            'Umum',
-            style: TextStyle(
-              color: Colors.blue.shade700,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  'Notifikasi',
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
 
-          // --- TOMBOL TEST NOTIFIKASI ---
-          Card(
-            elevation: 0,
-            color: Colors.grey.shade50,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.shade200),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListTile(
-                leading: const Icon(Icons.notifications_active_outlined, color: Colors.orange),
-                title: const Text('Test Notifikasi'),
-                subtitle: const Text('Coba kirim notifikasi manual'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () async {
-                  try {
-                    // Pastikan provider ini ada di bills_provider.dart
-                    final notifService = ref.read(notificationServiceProvider);
-                    
-                    // 1. Minta Izin
-                    await notifService.requestPermissions();
-
-                    // 2. Panggil fungsi test
-                    await notifService.showInstantNotification();
-                    
-                    if (!context.mounted) return;
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Perintah notifikasi dikirim! Cek status bar.'),
-                        backgroundColor: Colors.green,
-                        duration: Duration(seconds: 2),
+                Card(
+                  elevation: 0,
+                  color: Colors.grey.shade50,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.alarm, color: Colors.blue.shade700),
+                        ),
+                        title: const Text(
+                          'Ingatkan Tagihan Tiap Hari',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        value: _isDailyReminderEnabled,
+                        activeColor: Colors.blue,
+                        onChanged: (val) {
+                          _toggleDailyReminder(val);
+                        },
                       ),
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-              ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                Text(
+                  'Tentang',
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                
+                Card(
+                   elevation: 0,
+                  color: Colors.grey.shade50,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: const ListTile(
+                    leading: Icon(Icons.info_outline),
+                    title: Text('Versi Aplikasi'),
+                    trailing: Text(
+                      '1.0.0',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          
-          const SizedBox(height: 20),
-          const Center(
-            child: Text(
-              'Versi Aplikasi 1.0.0',
-              style: TextStyle(color: Colors.grey),
-            ),
-          )
-        ],
-      ),
     );
   }
 }

@@ -128,21 +128,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Pop-up Ringkasan
   void _showSummaryPopup(BuildContext context, List<Bill> allBills) {
     final unpaidBills = allBills.where((b) => !b.isPaid).toList();
-    final paidBills = allBills.where((b) => b.isPaid).toList();
+    unpaidBills.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
-    double totalUnpaid = 0;
-    for (var bill in unpaidBills) {
-      totalUnpaid += bill.amount;
-    }
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
-    final currencyFormatter = NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    );
+    final Map<String, String> categoryImages = {
+      'PDAM': 'assets/images/PDAM.png',
+      'PLN': 'assets/images/PLN.png',
+      'Pendidikan': 'assets/images/Pendidikan.png',
+      'Internet': 'assets/images/Wifi.png',
+    };
 
     showModalBottomSheet(
       context: context,
@@ -160,6 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Handle Bar
               Center(
                 child: Container(
                   width: 40,
@@ -171,84 +170,143 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
+              
               const Text(
-                'Total Tagihan Aktif',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.shade100),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      currencyFormatter.format(totalUnpaid),
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${unpaidBills.length} tagihan belum lunas',
-                      style: TextStyle(color: Colors.red.shade400),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Riwayat Lunas',
+                'Jatuh Tempo',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
+
               Expanded(
-                child: paidBills.isEmpty
+                child: unpaidBills.isEmpty
                     ? Center(
                         child: Text(
-                          'Belum ada tagihan lunas',
-                          style: TextStyle(color: Colors.grey[400]),
+                          'Hore! Tidak ada tagihan pending.',
+                          style: TextStyle(color: Colors.grey[500]),
                         ),
                       )
                     : ListView.separated(
-                        itemCount: paidBills.length,
-                        separatorBuilder: (_, __) => const Divider(),
+                        itemCount: unpaidBills.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
-                          final bill = paidBills[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.green,
-                              radius: 16,
-                              child: Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 16,
-                              ),
+                          final bill = unpaidBills[index];
+                          
+                          final billDate = DateTime(
+                            bill.dueDate.year, 
+                            bill.dueDate.month, 
+                            bill.dueDate.day
+                          );
+                          final difference = billDate.difference(today).inDays;
+
+                          String statusText;
+                          Color statusColor;
+                          Color bgColor;
+
+                          if (difference < 0) {
+                            statusText = 'Telat ${difference.abs()} hari';
+                            statusColor = Colors.red.shade700;
+                            bgColor = Colors.red.shade50;
+                          } else if (difference == 0) {
+                            statusText = 'Hari ini';
+                            statusColor = Colors.orange.shade800;
+                            bgColor = Colors.orange.shade50;
+                          } else if (difference <= 3) {
+                            statusText = '$difference hari lagi';
+                            statusColor = Colors.orange.shade700;
+                            bgColor = Colors.orange.shade50;
+                          } else {
+                            statusText = '$difference hari lagi';
+                            statusColor = Colors.blue.shade700;
+                            bgColor = Colors.blue.shade50;
+                          }
+
+                          final imageAsset = categoryImages[bill.category];
+
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 2),
+                                )
+                              ],
                             ),
-                            title: Text(
-                              bill.title,
-                              style: const TextStyle(
-                                decoration: TextDecoration.lineThrough,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            trailing: Text(
-                              currencyFormatter.format(bill.amount),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: imageAsset != null
+                                      ? Image.asset(
+                                          imageAsset,
+                                          fit: BoxFit.contain,
+                                        )
+                                      : Icon(
+                                          Icons.receipt_long,
+                                          color: Colors.grey.shade400,
+                                          size: 24,
+                                        ),
+                                ),
+                                const SizedBox(width: 12),
+                                
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        bill.title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        DateFormat.yMMMd('id_ID').format(bill.dueDate),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, 
+                                    vertical: 6
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: bgColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: statusColor.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    statusText,
+                                    style: TextStyle(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
