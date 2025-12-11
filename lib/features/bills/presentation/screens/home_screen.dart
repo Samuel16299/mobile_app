@@ -170,7 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-              
+
               const Text(
                 'Jatuh Tempo',
                 style: TextStyle(
@@ -194,11 +194,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final bill = unpaidBills[index];
-                          
+
                           final billDate = DateTime(
-                            bill.dueDate.year, 
-                            bill.dueDate.month, 
-                            bill.dueDate.day
+                            bill.dueDate.year,
+                            bill.dueDate.month,
+                            bill.dueDate.day,
                           );
                           final difference = billDate.difference(today).inDays;
 
@@ -236,7 +236,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   color: Colors.black.withOpacity(0.05),
                                   blurRadius: 5,
                                   offset: const Offset(0, 2),
-                                )
+                                ),
                               ],
                             ),
                             child: Row(
@@ -261,10 +261,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                 ),
                                 const SizedBox(width: 12),
-                                
+
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         bill.title,
@@ -275,7 +276,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        DateFormat.yMMMd('id_ID').format(bill.dueDate),
+                                        DateFormat.yMMMd(
+                                          'id_ID',
+                                        ).format(bill.dueDate),
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey[600],
@@ -287,8 +290,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, 
-                                    vertical: 6
+                                    horizontal: 10,
+                                    vertical: 6,
                                   ),
                                   decoration: BoxDecoration(
                                     color: bgColor,
@@ -329,16 +332,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // Data Kategori Statis (Bahasa Indonesia)
     final categories = [
-      {
-        'id': 'PDAM',
-        'label': 'PDAM',
-        'image': 'assets/images/PDAM.png',
-      },
-      {
-        'id': 'PLN',
-        'label': 'PLN',
-        'image': 'assets/images/PLN.png',
-      },
+      {'id': 'PDAM', 'label': 'PDAM', 'image': 'assets/images/PDAM.png'},
+      {'id': 'PLN', 'label': 'PLN', 'image': 'assets/images/PLN.png'},
       {
         'id': 'Pendidikan',
         'label': 'Pendidikan',
@@ -402,9 +397,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               } catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Gagal keluar')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Gagal keluar')));
               }
             }
           },
@@ -466,9 +461,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            user != null
-                                ? 'Halo, ${user.email}'
-                                : 'Halo, user',
+                            user != null ? 'Halo, ${user.email}' : 'Halo, user',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white70,
                             ),
@@ -487,10 +480,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Daftar catatan',
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  Text('Daftar catatan', style: theme.textTheme.titleMedium),
                   if (_selectedCategory != null)
                     TextButton(
                       onPressed: () => setState(() => _selectedCategory = null),
@@ -570,8 +560,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Text(
                               label,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    isSelected ? Colors.white : Colors.black87,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
                                     : FontWeight.normal,
@@ -641,7 +632,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Card(
                           elevation: 0,
-                          color: b.isPaid ? _paidGreenBg : const Color(0xFFF5F6FA),
+                          color: b.isPaid
+                              ? _paidGreenBg
+                              : const Color(0xFFF5F6FA),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -680,8 +673,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 decoration: b.isPaid
                                     ? TextDecoration.lineThrough
                                     : null,
-                                color:
-                                    b.isPaid ? Colors.grey : Colors.black,
+                                color: b.isPaid ? Colors.grey : Colors.black,
                               ),
                             ),
                             subtitle: Column(
@@ -714,8 +706,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                            BillFormScreen(bill: b),
+                                        builder: (_) => BillFormScreen(bill: b),
                                       ),
                                     );
                                   },
@@ -736,8 +727,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                         actions: [
                                           TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(ctx),
+                                            onPressed: () => Navigator.pop(ctx),
                                             child: const Text('Batal'),
                                           ),
                                           TextButton(
@@ -763,8 +753,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      BillDetailScreen(bill: b),
+                                  builder: (_) => BillDetailScreen(bill: b),
                                 ),
                               );
                             },
